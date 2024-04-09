@@ -1,7 +1,7 @@
 
-# dprs-frontend
+# Frontend Service For DPRS (Digital Platforms Reporting Service)
 
-This is a placeholder README.md for a new repository
+For the moment, all you'll find here is support for connecting to the backend (`dprs`).
 
 ### License
 
