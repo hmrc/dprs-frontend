@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-package connectors
+package connectors.registration.withId
 
 import com.google.inject.{Inject, Singleton}
 import config.FrontendAppConfig
-import connectors.RegistrationWithIdForOrganisationConnector.Requests.Request
-import connectors.RegistrationWithIdForOrganisationConnector.Responses.Response
+import connectors.registration.RegistrationConnector
+import connectors.registration.withId.RegistrationWithIdForOrganisationConnector.Requests.Request
+import connectors.registration.withId.RegistrationWithIdForOrganisationConnector.Responses.Response
+import connectors.{BaseBackendConnector, BaseConnector}
 import play.api.libs.functional.syntax.{toFunctionalBuilderOps, unlift}
 import play.api.libs.json.{JsPath, OWrites, Reads}
 import play.api.libs.ws.WSClient
@@ -37,7 +39,7 @@ class RegistrationWithIdForOrganisationConnector @Inject() (frontendAppConfig: F
     post[Request, Response](request)
 
   override def url(): URL =
-    url"${frontendAppConfig.registrationWithIdForOrganisationBaseUrl + RegistrationWithIdForOrganisationConnector.connectorPath}"
+    url"${frontendAppConfig.baseUrlForBackendConnector + RegistrationWithIdForOrganisationConnector.connectorPath}"
 
 }
 
@@ -62,22 +64,20 @@ object RegistrationWithIdForOrganisationConnector {
 
   object Responses {
 
-    import RegistrationWithIdConnector.{Responses => CommonResponses}
-
-    final case class Response(ids: Seq[CommonResponses.Id],
+    final case class Response(ids: Seq[RegistrationConnector.Responses.Id],
                               name: String,
                               _type: String,
-                              address: CommonResponses.Address,
-                              contactDetails: CommonResponses.ContactDetails
+                              address: RegistrationWithIdConnector.Responses.Address,
+                              contactDetails: RegistrationWithIdConnector.Responses.ContactDetails
     )
 
     object Response {
       implicit lazy val reads: Reads[Response] =
-        ((JsPath \ "ids").read[Seq[CommonResponses.Id]] and
+        ((JsPath \ "ids").read[Seq[RegistrationConnector.Responses.Id]] and
           (JsPath \ "name").read[String] and
           (JsPath \ "type").read[String] and
-          (JsPath \ "address").read[CommonResponses.Address] and
-          (JsPath \ "contactDetails").read[CommonResponses.ContactDetails])(Response.apply _)
+          (JsPath \ "address").read[RegistrationWithIdConnector.Responses.Address] and
+          (JsPath \ "contactDetails").read[RegistrationWithIdConnector.Responses.ContactDetails])(Response.apply _)
     }
 
   }
