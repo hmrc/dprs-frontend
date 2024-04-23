@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-package connectors
+package connectors.registration.withId
 
 import com.google.inject.{Inject, Singleton}
 import config.FrontendAppConfig
-import connectors.RegistrationWithIdForIndividualConnector.Requests.Request
-import connectors.RegistrationWithIdForIndividualConnector.Responses.Response
+import connectors.registration.RegistrationConnector
+import connectors.registration.withId.RegistrationWithIdForIndividualConnector.Requests.Request
+import connectors.registration.withId.RegistrationWithIdForIndividualConnector.Responses.Response
+import connectors.{BaseBackendConnector, BaseConnector}
 import play.api.libs.functional.syntax.{toFunctionalBuilderOps, unlift}
 import play.api.libs.json.{JsPath, OWrites, Reads}
 import play.api.libs.ws.WSClient
@@ -37,7 +39,7 @@ class RegistrationWithIdForIndividualConnector @Inject() (frontendAppConfig: Fro
     post[Request, Response](request)
 
   override def url(): URL =
-    url"${frontendAppConfig.registrationWithIdForIndividualBaseUrl + RegistrationWithIdForIndividualConnector.connectorPath}"
+    url"${frontendAppConfig.baseUrlForBackendConnector + RegistrationWithIdForIndividualConnector.connectorPath}"
 
 }
 
@@ -64,27 +66,25 @@ object RegistrationWithIdForIndividualConnector {
 
   object Responses {
 
-    import RegistrationWithIdConnector.{Responses => CommonResponses}
-
-    final case class Response(ids: Seq[CommonResponses.Id],
+    final case class Response(ids: Seq[RegistrationConnector.Responses.Id],
                               firstName: String,
                               middleName: Option[String],
                               lastName: String,
                               dateOfBirth: Option[String],
-                              address: CommonResponses.Address,
-                              contactDetails: CommonResponses.ContactDetails
+                              address: RegistrationWithIdConnector.Responses.Address,
+                              contactDetails: RegistrationWithIdConnector.Responses.ContactDetails
     )
 
     object Response {
 
       implicit lazy val reads: Reads[Response] =
-        ((JsPath \ "ids").read[Seq[CommonResponses.Id]] and
+        ((JsPath \ "ids").read[Seq[RegistrationConnector.Responses.Id]] and
           (JsPath \ "firstName").read[String] and
           (JsPath \ "middleName").readNullable[String] and
           (JsPath \ "lastName").read[String] and
           (JsPath \ "dateOfBirth").readNullable[String] and
-          (JsPath \ "address").read[CommonResponses.Address] and
-          (JsPath \ "contactDetails").read[CommonResponses.ContactDetails])(Response.apply _)
+          (JsPath \ "address").read[RegistrationWithIdConnector.Responses.Address] and
+          (JsPath \ "contactDetails").read[RegistrationWithIdConnector.Responses.ContactDetails])(Response.apply _)
 
     }
 

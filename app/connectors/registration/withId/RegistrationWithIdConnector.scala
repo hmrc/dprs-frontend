@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package connectors
+package connectors.registration.withId
 
 import play.api.libs.functional.syntax.{toFunctionalBuilderOps, unlift}
 import play.api.libs.json.{JsPath, OWrites, Reads}
@@ -34,14 +34,6 @@ object RegistrationWithIdConnector {
   }
 
   object Responses {
-
-    final case class Id(idType: String, value: String)
-
-    object Id {
-      implicit lazy val reads: Reads[Id] =
-        ((JsPath \ "type").read[String] and
-          (JsPath \ "value").read[String])(Id.apply _)
-    }
 
     final case class Address(lineOne: String,
                              lineTwo: Option[String],

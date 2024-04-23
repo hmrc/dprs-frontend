@@ -27,15 +27,13 @@ class FrontendAppConfig @Inject() (configuration: Configuration) {
 
   private val contactHost                  = configuration.get[String]("contact-frontend.host")
   private val contactFormServiceIdentifier = "dprs-frontend"
-  private val baseUrlForBackendConnector   = generateBaseUrl(BaseBackendConnector.connectorName)
   private val exitSurveyBaseUrl: String    = configuration.get[Service]("microservice.services.feedback-frontend").baseUrl
+  val timeout: Int                         = configuration.get[Int]("timeout-dialog.timeout")
 
-  val timeout: Int   = configuration.get[Int]("timeout-dialog.timeout")
   val countdown: Int = configuration.get[Int]("timeout-dialog.countdown")
   val cacheTtl: Int  = configuration.get[Int]("mongodb.timeToLiveInSeconds")
 
-  val registrationWithIdForIndividualBaseUrl: String   = baseUrlForBackendConnector
-  val registrationWithIdForOrganisationBaseUrl: String = baseUrlForBackendConnector
+  val baseUrlForBackendConnector: String = generateBaseUrl(BaseBackendConnector.connectorName)
 
   val host: String    = configuration.get[String]("host")
   val appName: String = configuration.get[String]("appName")
