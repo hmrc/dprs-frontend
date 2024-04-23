@@ -17,25 +17,18 @@
 package services.registration.withId
 
 import com.google.inject.{Inject, Singleton}
-import connectors.registration.withId.{RegistrationWithIdConnector, RegistrationWithIdForIndividualConnector}
-import services.BaseService
-import services.registration.RegistrationService
-
-import scala.concurrent.{ExecutionContext, Future}
+import connectors.registration.withId.RegistrationWithIdForIndividualConnector
+import connectors.registration.withId.RegistrationWithIdForIndividualConnector.{Requests => ConnectorRequests, Responses => ConnectorResponses}
+import converters.registration.withId.RegistrationWithIdForIndividualConverter
+import services.registration.withId.RegistrationWithIdForIndividualService.{Requests => ServiceRequests, Responses => ServiceResponses}
 
 @Singleton
-class RegistrationWithIdForIndividualService @Inject() (connector: RegistrationWithIdForIndividualConnector) {
-
-  private val converter = new RegistrationWithIdForIndividualService.Converter
-
-  def call(request: RegistrationWithIdForIndividualService.Requests.Request)(implicit
-    executionContext: ExecutionContext
-  ): Future[Either[BaseService.Responses.Errors, RegistrationWithIdForIndividualService.Responses.Response]] =
-    connector.call(converter.convert(request)).map {
-      case Right(response) => Right(converter.convert(response))
-      case Left(errors)    => Left(converter.convert(errors))
-    }
-}
+class RegistrationWithIdForIndividualService @Inject() (connector: RegistrationWithIdForIndividualConnector,
+                                                        converter: RegistrationWithIdForIndividualConverter
+) extends BaseRegistrationWithIdService[ServiceRequests.Request, ServiceResponses.Response, ConnectorRequests.Request, ConnectorResponses.Response](
+      connector,
+      converter
+    )
 
 object RegistrationWithIdForIndividualService {
 
@@ -61,48 +54,17 @@ object RegistrationWithIdForIndividualService {
 
   object Responses {
 
-    import RegistrationWithIdService.Responses._
+    import services.registration.BaseRegistrationService.{Responses => CommonResponses}
+    import services.registration.withId.BaseRegistrationWithIdService.{Responses => ServiceResponses}
 
-    final case class Response(ids: Seq[RegistrationService.Responses.Id],
+    final case class Response(ids: Seq[CommonResponses.Id],
                               firstName: String,
                               middleName: Option[String],
                               lastName: String,
                               dateOfBirth: Option[String],
-                              address: Address,
-                              contactDetails: ContactDetails
+                              address: ServiceResponses.Address,
+                              contactDetails: ServiceResponses.ContactDetails
     )
-
-  }
-
-  class Converter extends RegistrationWithIdService.Converter {
-
-    def convert(request: RegistrationWithIdForIndividualService.Requests.Request): RegistrationWithIdForIndividualConnector.Requests.Request =
-      RegistrationWithIdForIndividualConnector.Requests.Request(id = convert(request.id),
-                                                                firstName = request.firstName,
-                                                                middleName = request.middleName,
-                                                                lastName = request.lastName,
-                                                                dateOfBirth = request.dateOfBirth
-      )
-
-    def convert(response: RegistrationWithIdForIndividualConnector.Responses.Response): RegistrationWithIdForIndividualService.Responses.Response =
-      RegistrationWithIdForIndividualService.Responses.Response(
-        ids = response.ids.map(convert),
-        firstName = response.firstName,
-        middleName = response.middleName,
-        lastName = response.lastName,
-        dateOfBirth = response.dateOfBirth,
-        address = convert(response.address),
-        contactDetails = convert(response.contactDetails)
-      )
-
-    private def convert(id: RegistrationWithIdForIndividualService.Requests.Id): RegistrationWithIdConnector.Requests.Id =
-      RegistrationWithIdConnector.Requests.Id(idType = convert(id.idType), value = id.value)
-
-    private def convert(idType: RegistrationWithIdForIndividualService.Requests.IdType): String = idType match {
-      case RegistrationWithIdForIndividualService.Requests.IdType.EORI => "EORI"
-      case RegistrationWithIdForIndividualService.Requests.IdType.NINO => "NINO"
-      case RegistrationWithIdForIndividualService.Requests.IdType.UTR  => "UTR"
-    }
 
   }
 

@@ -16,10 +16,16 @@
 
 package services.registration
 
-import connectors.registration.RegistrationConnector
+import connectors.BaseConnector
+import converters.BaseConverter
 import services.BaseService
 
-object RegistrationService {
+abstract class BaseRegistrationService[SERVICE_REQUEST, SERVICE_RESPONSE, CONNECTOR_REQUEST, CONNECTOR_RESPONSE](
+  connector: BaseConnector[CONNECTOR_REQUEST, CONNECTOR_RESPONSE],
+  converter: BaseConverter[SERVICE_REQUEST, CONNECTOR_REQUEST, CONNECTOR_RESPONSE, SERVICE_RESPONSE]
+) extends BaseService[SERVICE_REQUEST, SERVICE_RESPONSE, CONNECTOR_REQUEST, CONNECTOR_RESPONSE](connector, converter)
+
+object BaseRegistrationService {
 
   object Responses {
 
@@ -41,18 +47,4 @@ object RegistrationService {
 
   }
 
-  abstract class Converter extends BaseService.Converter {
-
-    private val idTypes = Map(
-      "ARN"  -> RegistrationService.Responses.IdType.ARN,
-      "SAP"  -> RegistrationService.Responses.IdType.SAP,
-      "SAFE" -> RegistrationService.Responses.IdType.SAFE
-    )
-
-    protected def convert(id: RegistrationConnector.Responses.Id): RegistrationService.Responses.Id =
-      RegistrationService.Responses.Id(idType = convert(id.idType), value = id.value)
-
-    protected def convert(idType: String): RegistrationService.Responses.IdType =
-      idTypes.getOrElse(idType, RegistrationService.Responses.IdType.UNKNOWN)
-  }
 }

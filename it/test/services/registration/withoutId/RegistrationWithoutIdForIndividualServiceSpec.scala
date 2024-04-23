@@ -19,14 +19,14 @@ package services.registration.withoutId
 import com.github.tomakehurst.wiremock.client.WireMock._
 import connectors.BaseConnector
 import connectors.registration.withoutId.RegistrationWithoutIdForIndividualConnector.connectorPath
-import play.api.http.Status.{BAD_REQUEST, CONFLICT, INTERNAL_SERVER_ERROR, OK, SERVICE_UNAVAILABLE}
-import services.BaseService.Responses.Error
-import services.registration.RegistrationService
-import services.registration.withoutId.RegistrationWithoutIdForIndividualService.Requests
-import services.registration.withoutId.RegistrationWithoutIdService.{Requests => RequestsCommon}
-import services.{BaseBackendConnectorIntSpec, BaseService}
+import play.api.http.Status._
+import services.BaseBackendConnectorSpec
+import services.BaseService.{Responses => CommonResponses}
+import services.registration.BaseRegistrationService.{Responses => CommonRegistrationResponses}
+import services.registration.withoutId.BaseRegistrationWithoutIdService.{Requests => CommonRegistrationWithoutIdRequests}
+import services.registration.withoutId.RegistrationWithoutIdForIndividualService.Requests.Request
 
-class RegistrationWithoutIdForIndividualServiceSpec extends BaseBackendConnectorIntSpec {
+class RegistrationWithoutIdForIndividualServiceSpec extends BaseBackendConnectorSpec {
 
   private lazy val service = app.injector.instanceOf[RegistrationWithoutIdForIndividualService]
 
@@ -82,65 +82,65 @@ class RegistrationWithoutIdForIndividualServiceSpec extends BaseBackendConnector
             )
         )
 
-        val request = Requests.Request(
+        val request = Request(
           firstName = "Patrick",
           middleName = Some("John"),
           lastName = "Dyson",
           dateOfBirth = "1970-10-04",
-          address = RequestsCommon.Address(lineOne = "34 Park Lane",
-                                           lineTwo = Some("Building A"),
-                                           lineThree = Some("Suite 100"),
-                                           lineFour = Some("Manchester"),
-                                           postalCode = "M54 1MQ",
-                                           countryCode = "GB"
+          address = CommonRegistrationWithoutIdRequests.Address(lineOne = "34 Park Lane",
+                                                                lineTwo = Some("Building A"),
+                                                                lineThree = Some("Suite 100"),
+                                                                lineFour = Some("Manchester"),
+                                                                postalCode = "M54 1MQ",
+                                                                countryCode = "GB"
           ),
-          contactDetails = RequestsCommon.ContactDetails(landline = Some("747663966"),
-                                                         mobile = Some("38390756243"),
-                                                         fax = Some("58371813020"),
-                                                         emailAddress = Some("Patrick.Dyson@example.com")
+          contactDetails = CommonRegistrationWithoutIdRequests.ContactDetails(landline = Some("747663966"),
+                                                                              mobile = Some("38390756243"),
+                                                                              fax = Some("58371813020"),
+                                                                              emailAddress = Some("Patrick.Dyson@example.com")
           )
         )
 
         val response = await(service.call(request))
 
         response shouldBe Right(
-          RegistrationService.Responses.Response(ids =
+          CommonRegistrationResponses.Response(ids =
             Seq(
-              RegistrationService.Responses.Id(RegistrationService.Responses.IdType.ARN, "WARN3849921"),
-              RegistrationService.Responses.Id(RegistrationService.Responses.IdType.SAFE, "XE0000200775706"),
-              RegistrationService.Responses.Id(RegistrationService.Responses.IdType.SAP, "1960629967")
+              CommonRegistrationResponses.Id(CommonRegistrationResponses.IdType.ARN, "WARN3849921"),
+              CommonRegistrationResponses.Id(CommonRegistrationResponses.IdType.SAFE, "XE0000200775706"),
+              CommonRegistrationResponses.Id(CommonRegistrationResponses.IdType.SAP, "1960629967")
             )
           )
         )
         verifyThatDownstreamApiWasCalled()
       }
       "fails, where the response body is" - {
-        "valid, with a status code of" - {
+        "absent, with a status code of" - {
           "internal service error" in {
             stubFor(
               post(urlEqualTo(connectorPath))
                 .withRequestBody(equalToJson("""
-                      |{
-                      |    "firstName": "Patrick",
-                      |    "middleName": "John",
-                      |    "lastName": "Dyson",
-                      |    "dateOfBirth": "1970-10-04",
-                      |    "address": {
-                      |        "lineOne": "34 Park Lane",
-                      |        "lineTwo": "Building A",
-                      |        "lineThree": "Suite 100",
-                      |        "lineFour": "Manchester",
-                      |        "postalCode": "M54 1MQ",
-                      |        "countryCode": "GB"
-                      |    },
-                      |    "contactDetails": {
-                      |        "landline": "747663966",
-                      |        "mobile": "38390756243",
-                      |        "fax": "58371813020",
-                      |        "emailAddress": "Patrick.Dyson@example.com"
-                      |    }
-                      |}
-                      |""".stripMargin))
+                                               |{
+                                               |    "firstName": "Patrick",
+                                               |    "middleName": "John",
+                                               |    "lastName": "Dyson",
+                                               |    "dateOfBirth": "1970-10-04",
+                                               |    "address": {
+                                               |        "lineOne": "34 Park Lane",
+                                               |        "lineTwo": "Building A",
+                                               |        "lineThree": "Suite 100",
+                                               |        "lineFour": "Manchester",
+                                               |        "postalCode": "M54 1MQ",
+                                               |        "countryCode": "GB"
+                                               |    },
+                                               |    "contactDetails": {
+                                               |        "landline": "747663966",
+                                               |        "mobile": "38390756243",
+                                               |        "fax": "58371813020",
+                                               |        "emailAddress": "Patrick.Dyson@example.com"
+                                               |    }
+                                               |}
+                                               |""".stripMargin))
                 .willReturn(
                   aResponse()
                     .withHeader("Content-Type", "application/json")
@@ -148,30 +148,32 @@ class RegistrationWithoutIdForIndividualServiceSpec extends BaseBackendConnector
                 )
             )
 
-            val request = Requests.Request(
+            val request = Request(
               firstName = "Patrick",
               middleName = Some("John"),
               lastName = "Dyson",
               dateOfBirth = "1970-10-04",
-              address = RequestsCommon.Address(lineOne = "34 Park Lane",
-                                               lineTwo = Some("Building A"),
-                                               lineThree = Some("Suite 100"),
-                                               lineFour = Some("Manchester"),
-                                               postalCode = "M54 1MQ",
-                                               countryCode = "GB"
+              address = CommonRegistrationWithoutIdRequests.Address(lineOne = "34 Park Lane",
+                                                                    lineTwo = Some("Building A"),
+                                                                    lineThree = Some("Suite 100"),
+                                                                    lineFour = Some("Manchester"),
+                                                                    postalCode = "M54 1MQ",
+                                                                    countryCode = "GB"
               ),
-              contactDetails = RequestsCommon.ContactDetails(landline = Some("747663966"),
-                                                             mobile = Some("38390756243"),
-                                                             fax = Some("58371813020"),
-                                                             emailAddress = Some("Patrick.Dyson@example.com")
+              contactDetails = CommonRegistrationWithoutIdRequests.ContactDetails(landline = Some("747663966"),
+                                                                                  mobile = Some("38390756243"),
+                                                                                  fax = Some("58371813020"),
+                                                                                  emailAddress = Some("Patrick.Dyson@example.com")
               )
             )
 
             val response = await(service.call(request))
 
-            response shouldBe Left(BaseService.Responses.Errors(INTERNAL_SERVER_ERROR))
+            response shouldBe Left(CommonResponses.Errors(INTERNAL_SERVER_ERROR))
             verifyThatDownstreamApiWasCalled()
           }
+        }
+        "valid, with a status code of" - {
           "service unavailable" in {
             stubFor(
               post(urlEqualTo(connectorPath))
@@ -211,32 +213,32 @@ class RegistrationWithoutIdForIndividualServiceSpec extends BaseBackendConnector
                 )
             )
 
-            val request = Requests.Request(
+            val request = Request(
               firstName = "Patrick",
               middleName = Some("John"),
               lastName = "Dyson",
               dateOfBirth = "1970-10-04",
-              address = RequestsCommon.Address(lineOne = "34 Park Lane",
-                                               lineTwo = Some("Building A"),
-                                               lineThree = Some("Suite 100"),
-                                               lineFour = Some("Manchester"),
-                                               postalCode = "M54 1MQ",
-                                               countryCode = "GB"
+              address = CommonRegistrationWithoutIdRequests.Address(lineOne = "34 Park Lane",
+                                                                    lineTwo = Some("Building A"),
+                                                                    lineThree = Some("Suite 100"),
+                                                                    lineFour = Some("Manchester"),
+                                                                    postalCode = "M54 1MQ",
+                                                                    countryCode = "GB"
               ),
-              contactDetails = RequestsCommon.ContactDetails(landline = Some("747663966"),
-                                                             mobile = Some("38390756243"),
-                                                             fax = Some("58371813020"),
-                                                             emailAddress = Some("Patrick.Dyson@example.com")
+              contactDetails = CommonRegistrationWithoutIdRequests.ContactDetails(landline = Some("747663966"),
+                                                                                  mobile = Some("38390756243"),
+                                                                                  fax = Some("58371813020"),
+                                                                                  emailAddress = Some("Patrick.Dyson@example.com")
               )
             )
 
             val response = await(service.call(request))
 
             response shouldBe Left(
-              BaseService.Responses.Errors(
+              CommonResponses.Errors(
                 SERVICE_UNAVAILABLE,
                 Seq(
-                  Error("eis-returned-service-unavailable")
+                  CommonResponses.Error("eis-returned-service-unavailable")
                 )
               )
             )
@@ -284,33 +286,33 @@ class RegistrationWithoutIdForIndividualServiceSpec extends BaseBackendConnector
                 )
             )
 
-            val request = Requests.Request(
+            val request = Request(
               firstName = "Patrick",
               middleName = Some("John"),
               lastName = "",
               dateOfBirth = "10-04-1970",
-              address = RequestsCommon.Address(lineOne = "34 Park Lane",
-                                               lineTwo = Some("Building A"),
-                                               lineThree = Some("Suite 100"),
-                                               lineFour = Some("Manchester"),
-                                               postalCode = "M54 1MQ",
-                                               countryCode = "GB"
+              address = CommonRegistrationWithoutIdRequests.Address(lineOne = "34 Park Lane",
+                                                                    lineTwo = Some("Building A"),
+                                                                    lineThree = Some("Suite 100"),
+                                                                    lineFour = Some("Manchester"),
+                                                                    postalCode = "M54 1MQ",
+                                                                    countryCode = "GB"
               ),
-              contactDetails = RequestsCommon.ContactDetails(landline = Some("747663966"),
-                                                             mobile = Some("38390756243"),
-                                                             fax = Some("58371813020"),
-                                                             emailAddress = Some("Patrick.Dyson@example.com")
+              contactDetails = CommonRegistrationWithoutIdRequests.ContactDetails(landline = Some("747663966"),
+                                                                                  mobile = Some("38390756243"),
+                                                                                  fax = Some("58371813020"),
+                                                                                  emailAddress = Some("Patrick.Dyson@example.com")
               )
             )
 
             val response = await(service.call(request))
 
             response shouldBe Left(
-              BaseService.Responses.Errors(
+              CommonResponses.Errors(
                 BAD_REQUEST,
                 Seq(
-                  Error("invalid-last-name"),
-                  Error("invalid-date-of-birth")
+                  CommonResponses.Error("invalid-last-name"),
+                  CommonResponses.Error("invalid-date-of-birth")
                 )
               )
             )
@@ -355,32 +357,32 @@ class RegistrationWithoutIdForIndividualServiceSpec extends BaseBackendConnector
                 )
             )
 
-            val request = Requests.Request(
+            val request = Request(
               firstName = "Patrick",
               middleName = Some("John"),
               lastName = "",
               dateOfBirth = "10-04-1970",
-              address = RequestsCommon.Address(lineOne = "34 Park Lane",
-                                               lineTwo = Some("Building A"),
-                                               lineThree = Some("Suite 100"),
-                                               lineFour = Some("Manchester"),
-                                               postalCode = "M54 1MQ",
-                                               countryCode = "GB"
+              address = CommonRegistrationWithoutIdRequests.Address(lineOne = "34 Park Lane",
+                                                                    lineTwo = Some("Building A"),
+                                                                    lineThree = Some("Suite 100"),
+                                                                    lineFour = Some("Manchester"),
+                                                                    postalCode = "M54 1MQ",
+                                                                    countryCode = "GB"
               ),
-              contactDetails = RequestsCommon.ContactDetails(landline = Some("747663966"),
-                                                             mobile = Some("38390756243"),
-                                                             fax = Some("58371813020"),
-                                                             emailAddress = Some("Patrick.Dyson@example.com")
+              contactDetails = CommonRegistrationWithoutIdRequests.ContactDetails(landline = Some("747663966"),
+                                                                                  mobile = Some("38390756243"),
+                                                                                  fax = Some("58371813020"),
+                                                                                  emailAddress = Some("Patrick.Dyson@example.com")
               )
             )
 
             val response = await(service.call(request))
 
             response shouldBe Left(
-              BaseService.Responses.Errors(
+              CommonResponses.Errors(
                 CONFLICT,
                 Seq(
-                  Error("eis-returned-conflict")
+                  CommonResponses.Error("eis-returned-conflict")
                 )
               )
             )
@@ -427,22 +429,22 @@ class RegistrationWithoutIdForIndividualServiceSpec extends BaseBackendConnector
                 )
             )
 
-            val request = Requests.Request(
+            val request = Request(
               firstName = "Patrick",
               middleName = Some("John"),
               lastName = "Dyson",
               dateOfBirth = "1970-10-04",
-              address = RequestsCommon.Address(lineOne = "34 Park Lane",
-                                               lineTwo = Some("Building A"),
-                                               lineThree = Some("Suite 100"),
-                                               lineFour = Some("Manchester"),
-                                               postalCode = "M54 1MQ",
-                                               countryCode = "GB"
+              address = CommonRegistrationWithoutIdRequests.Address(lineOne = "34 Park Lane",
+                                                                    lineTwo = Some("Building A"),
+                                                                    lineThree = Some("Suite 100"),
+                                                                    lineFour = Some("Manchester"),
+                                                                    postalCode = "M54 1MQ",
+                                                                    countryCode = "GB"
               ),
-              contactDetails = RequestsCommon.ContactDetails(landline = Some("747663966"),
-                                                             mobile = Some("38390756243"),
-                                                             fax = Some("58371813020"),
-                                                             emailAddress = Some("Patrick.Dyson@example.com")
+              contactDetails = CommonRegistrationWithoutIdRequests.ContactDetails(landline = Some("747663966"),
+                                                                                  mobile = Some("38390756243"),
+                                                                                  fax = Some("58371813020"),
+                                                                                  emailAddress = Some("Patrick.Dyson@example.com")
               )
             )
 
@@ -502,22 +504,22 @@ class RegistrationWithoutIdForIndividualServiceSpec extends BaseBackendConnector
                 )
             )
 
-            val request = Requests.Request(
+            val request = Request(
               firstName = "Patrick",
               middleName = Some("John"),
               lastName = "Dyson",
               dateOfBirth = "1970-10-04",
-              address = RequestsCommon.Address(lineOne = "34 Park Lane",
-                                               lineTwo = Some("Building A"),
-                                               lineThree = Some("Suite 100"),
-                                               lineFour = Some("Manchester"),
-                                               postalCode = "M54 1MQ",
-                                               countryCode = "GB"
+              address = CommonRegistrationWithoutIdRequests.Address(lineOne = "34 Park Lane",
+                                                                    lineTwo = Some("Building A"),
+                                                                    lineThree = Some("Suite 100"),
+                                                                    lineFour = Some("Manchester"),
+                                                                    postalCode = "M54 1MQ",
+                                                                    countryCode = "GB"
               ),
-              contactDetails = RequestsCommon.ContactDetails(landline = Some("747663966"),
-                                                             mobile = Some("38390756243"),
-                                                             fax = Some("58371813020"),
-                                                             emailAddress = Some("Patrick.Dyson@example.com")
+              contactDetails = CommonRegistrationWithoutIdRequests.ContactDetails(landline = Some("747663966"),
+                                                                                  mobile = Some("38390756243"),
+                                                                                  fax = Some("58371813020"),
+                                                                                  emailAddress = Some("Patrick.Dyson@example.com")
               )
             )
 

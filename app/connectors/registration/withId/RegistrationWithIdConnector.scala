@@ -16,8 +16,14 @@
 
 package connectors.registration.withId
 
+import config.FrontendAppConfig
+import connectors.registration.RegistrationConnector
 import play.api.libs.functional.syntax.{toFunctionalBuilderOps, unlift}
 import play.api.libs.json.{JsPath, OWrites, Reads}
+import play.api.libs.ws.WSClient
+
+abstract class RegistrationWithIdConnector[REQUEST, RESPONSE](frontendAppConfig: FrontendAppConfig, wsClient: WSClient)
+    extends RegistrationConnector[REQUEST, RESPONSE](frontendAppConfig, wsClient)
 
 object RegistrationWithIdConnector {
 
