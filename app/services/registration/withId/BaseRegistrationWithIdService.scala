@@ -14,36 +14,30 @@
  * limitations under the License.
  */
 
-package services
+package services.registration.withId
 
 import connectors.BaseConnector
 import converters.BaseConverter
-import services.BaseService.Responses
+import services.registration.BaseRegistrationService
 
-import scala.concurrent.{ExecutionContext, Future}
-
-class BaseService[SERVICE_REQUEST, SERVICE_RESPONSE, CONNECTOR_REQUEST, CONNECTOR_RESPONSE](
+abstract class BaseRegistrationWithIdService[SERVICE_REQUEST, SERVICE_RESPONSE, CONNECTOR_REQUEST, CONNECTOR_RESPONSE](
   connector: BaseConnector[CONNECTOR_REQUEST, CONNECTOR_RESPONSE],
   converter: BaseConverter[SERVICE_REQUEST, CONNECTOR_REQUEST, CONNECTOR_RESPONSE, SERVICE_RESPONSE]
-) {
+) extends BaseRegistrationService[SERVICE_REQUEST, SERVICE_RESPONSE, CONNECTOR_REQUEST, CONNECTOR_RESPONSE](connector, converter)
 
-  final def call(request: SERVICE_REQUEST)(implicit
-    executionContext: ExecutionContext
-  ): Future[Either[Responses.Errors, SERVICE_RESPONSE]] =
-    connector.call(converter.convertServiceRequest(request)).map {
-      case Right(response) => Right(converter.convertSuccessfulConnectorResponse(response))
-      case Left(errors)    => Left(converter.convertFailedConnectorResponse(errors))
-    }
-
-}
-
-object BaseService {
+object BaseRegistrationWithIdService {
 
   object Responses {
 
-    final case class Errors(status: Int, errors: Seq[Error] = Seq.empty)
+    final case class Address(lineOne: String,
+                             lineTwo: Option[String],
+                             lineThree: Option[String],
+                             lineFour: Option[String],
+                             postalCode: String,
+                             countryCode: String
+    )
 
-    final case class Error(code: String)
+    final case class ContactDetails(landline: Option[String], mobile: Option[String], fax: Option[String], emailAddress: Option[String])
 
   }
 

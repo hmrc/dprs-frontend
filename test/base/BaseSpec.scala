@@ -21,4 +21,4 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.prop.TableDrivenPropertyChecks
 import org.scalatestplus.mockito.MockitoSugar
 
-class BaseSpec extends AnyFreeSpec with Matchers with TableDrivenPropertyChecks with MockitoSugar {}
+class BaseSpec extends AnyFreeSpec with Matchers with TableDrivenPropertyChecks with MockitoSugar

@@ -29,13 +29,7 @@ import uk.gov.hmrc.http.test.WireMockSupport
 import scala.concurrent.{Await, Awaitable, ExecutionContext}
 import scala.jdk.CollectionConverters.CollectionHasAsScala
 
-abstract class BaseConnectorIntSpec
-    extends AnyFreeSpec
-    with Matchers
-    with ScalaFutures
-    with IntegrationPatience
-    with GuiceOneServerPerSuite
-    with WireMockSupport {
+abstract class BaseConnectorSpec extends AnyFreeSpec with Matchers with ScalaFutures with IntegrationPatience with GuiceOneServerPerSuite with WireMockSupport {
 
   implicit val executionContext: ExecutionContext = app.injector.instanceOf[ExecutionContext]
 

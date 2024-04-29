@@ -16,8 +16,14 @@
 
 package connectors.registration
 
+import config.FrontendAppConfig
+import connectors.BaseBackendConnector
 import play.api.libs.functional.syntax.{toFunctionalBuilderOps, unlift}
 import play.api.libs.json.{JsPath, OWrites, Reads}
+import play.api.libs.ws.WSClient
+
+abstract class RegistrationConnector[REQUEST, RESPONSE](frontendAppConfig: FrontendAppConfig, wsClient: WSClient)
+    extends BaseBackendConnector[REQUEST, RESPONSE](frontendAppConfig, wsClient)
 
 object RegistrationConnector {
 

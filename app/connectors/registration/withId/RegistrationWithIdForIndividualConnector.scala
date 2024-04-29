@@ -18,28 +18,26 @@ package connectors.registration.withId
 
 import com.google.inject.{Inject, Singleton}
 import config.FrontendAppConfig
+import connectors.BaseConnector
 import connectors.registration.RegistrationConnector
 import connectors.registration.withId.RegistrationWithIdForIndividualConnector.Requests.Request
 import connectors.registration.withId.RegistrationWithIdForIndividualConnector.Responses.Response
-import connectors.{BaseBackendConnector, BaseConnector}
 import play.api.libs.functional.syntax.{toFunctionalBuilderOps, unlift}
 import play.api.libs.json.{JsPath, OWrites, Reads}
 import play.api.libs.ws.WSClient
-import uk.gov.hmrc.http.StringContextOps
 
-import java.net.URL
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class RegistrationWithIdForIndividualConnector @Inject() (frontendAppConfig: FrontendAppConfig, wsClient: WSClient) extends BaseBackendConnector(wsClient) {
+class RegistrationWithIdForIndividualConnector @Inject() (frontendAppConfig: FrontendAppConfig, wsClient: WSClient)
+    extends RegistrationWithIdConnector[Request, Response](frontendAppConfig, wsClient) {
 
-  def call(request: Request)(implicit
+  override def connectorPath: String = RegistrationWithIdForIndividualConnector.connectorPath
+
+  override def call(request: Request)(implicit
     executionContext: ExecutionContext
   ): Future[Either[BaseConnector.Responses.Errors, Response]] =
-    post[Request, Response](request)
-
-  override def url(): URL =
-    url"${frontendAppConfig.baseUrlForBackendConnector + RegistrationWithIdForIndividualConnector.connectorPath}"
+    post(request)
 
 }
 

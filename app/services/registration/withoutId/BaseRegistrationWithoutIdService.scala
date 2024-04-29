@@ -14,14 +14,22 @@
  * limitations under the License.
  */
 
-package services.registration.withId
+package services.registration.withoutId
 
-import connectors.registration.withId.RegistrationWithIdConnector
-import services.registration.RegistrationService
+import connectors.BaseConnector
+import connectors.registration.RegistrationConnector.{Responses => ConnectorResponses}
+import converters.BaseConverter
+import services.registration.BaseRegistrationService
+import services.registration.BaseRegistrationService.{Responses => ServiceResponses}
 
-object RegistrationWithIdService {
+abstract class BaseRegistrationWithoutIdService[SERVICE_REQUEST, CONNECTOR_REQUEST](
+  connector: BaseConnector[CONNECTOR_REQUEST, ConnectorResponses.Response],
+  converter: BaseConverter[SERVICE_REQUEST, CONNECTOR_REQUEST, ConnectorResponses.Response, ServiceResponses.Response]
+) extends BaseRegistrationService[SERVICE_REQUEST, ServiceResponses.Response, CONNECTOR_REQUEST, ConnectorResponses.Response](connector, converter)
 
-  object Responses {
+object BaseRegistrationWithoutIdService {
+
+  object Requests {
 
     final case class Address(lineOne: String,
                              lineTwo: Option[String],
@@ -32,29 +40,6 @@ object RegistrationWithIdService {
     )
 
     final case class ContactDetails(landline: Option[String], mobile: Option[String], fax: Option[String], emailAddress: Option[String])
-
-  }
-
-  abstract class Converter extends RegistrationService.Converter {
-
-    def convert(address: RegistrationWithIdConnector.Responses.Address): RegistrationWithIdService.Responses.Address =
-      RegistrationWithIdService.Responses.Address(
-        lineOne = address.lineOne,
-        lineTwo = address.lineTwo,
-        lineThree = address.lineThree,
-        lineFour = address.lineFour,
-        postalCode = address.postalCode,
-        countryCode = address.countryCode
-      )
-
-    def convert(
-      contactDetails: RegistrationWithIdConnector.Responses.ContactDetails
-    ): RegistrationWithIdService.Responses.ContactDetails = RegistrationWithIdService.Responses.ContactDetails(
-      landline = contactDetails.landline,
-      mobile = contactDetails.mobile,
-      fax = contactDetails.fax,
-      emailAddress = contactDetails.emailAddress
-    )
 
   }
 

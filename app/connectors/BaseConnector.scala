@@ -27,15 +27,17 @@ import java.net.URL
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
 
-abstract class BaseConnector(wsClient: WSClient) {
+abstract class BaseConnector[REQUEST, RESPONSE](wsClient: WSClient) {
+
+  def call(request: REQUEST)(implicit executionContext: ExecutionContext): Future[Either[BaseConnector.Responses.Errors, RESPONSE]]
 
   /** We would have liked to use HttpClientV2, but when it encounters a 400 or 500 status code, the response body is inaccessible.
     */
-  def post[S, T](request: S)(implicit
+  def post(request: REQUEST)(implicit
     executionContext: ExecutionContext,
-    writes: Writes[S],
-    reads: Reads[T]
-  ): Future[Either[Errors, T]] =
+    writes: Writes[REQUEST],
+    reads: Reads[RESPONSE]
+  ): Future[Either[Errors, RESPONSE]] =
     wsClient
       .url(url().toString)
       .post(toJson(request))
@@ -50,13 +52,13 @@ abstract class BaseConnector(wsClient: WSClient) {
 
   def url(): URL
 
-  private def asResponse[T](wsResponse: WSResponse)(implicit reads: Reads[T]): Try[Either[Errors, T]] =
+  private def asResponse(wsResponse: WSResponse)(implicit reads: Reads[RESPONSE]): Try[Either[Errors, RESPONSE]] =
     wsResponse.json
-      .validate[T]
+      .validate[RESPONSE]
       .map(response => Success(Right(response)))
       .getOrElse(Failure(new ResponseParsingException()))
 
-  private def asErrors[T](statusCode: Int, wsResponse: WSResponse): Try[Either[Errors, T]] =
+  private def asErrors(statusCode: Int, wsResponse: WSResponse): Try[Either[Errors, RESPONSE]] =
     if (wsResponse.body.nonEmpty)
       wsResponse.json
         .validate[Seq[BaseConnector.Responses.Error]]

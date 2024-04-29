@@ -16,7 +16,7 @@
 
 package services
 
-abstract class BaseBackendConnectorIntSpec extends BaseConnectorIntSpec {
+abstract class BaseBackendConnectorSpec extends BaseConnectorSpec {
 
   override lazy val connectorName: String = "backend"
 

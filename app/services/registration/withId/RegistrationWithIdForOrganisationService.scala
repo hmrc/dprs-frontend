@@ -17,29 +17,18 @@
 package services.registration.withId
 
 import com.google.inject.{Inject, Singleton}
-import connectors.registration.withId.{RegistrationWithIdConnector, RegistrationWithIdForOrganisationConnector}
-import services.BaseService
-import services.registration.RegistrationService
-import services.registration.withId.RegistrationWithIdForOrganisationService.Converter
-import services.registration.withId.RegistrationWithIdForOrganisationService.Requests.Request
-import services.registration.withId.RegistrationWithIdForOrganisationService.Responses.Response
-
-import scala.concurrent.{ExecutionContext, Future}
+import connectors.registration.withId.RegistrationWithIdForOrganisationConnector
+import connectors.registration.withId.RegistrationWithIdForOrganisationConnector.{Requests => ConnectorRequests, Responses => ConnectorResponses}
+import converters.registration.withId.RegistrationWithIdForOrganisationConverter
+import services.registration.withId.RegistrationWithIdForOrganisationService.{Requests => ServiceRequests, Responses => ServiceResponses}
 
 @Singleton
-class RegistrationWithIdForOrganisationService @Inject() (connector: RegistrationWithIdForOrganisationConnector) {
-
-  private val converter = new Converter
-
-  def call(request: Request)(implicit
-    executionContext: ExecutionContext
-  ): Future[Either[BaseService.Responses.Errors, Response]] =
-    connector.call(converter.convert(request)).map {
-      case Right(response) => Right(converter.convert(response))
-      case Left(errors)    => Left(converter.convert(errors))
-    }
-
-}
+class RegistrationWithIdForOrganisationService @Inject() (connector: RegistrationWithIdForOrganisationConnector,
+                                                          converter: RegistrationWithIdForOrganisationConverter
+) extends BaseRegistrationWithIdService[ServiceRequests.Request, ServiceResponses.Response, ConnectorRequests.Request, ConnectorResponses.Response](
+      connector,
+      converter
+    )
 
 object RegistrationWithIdForOrganisationService {
 
@@ -77,9 +66,15 @@ object RegistrationWithIdForOrganisationService {
 
   object Responses {
 
-    import RegistrationWithIdService.Responses._
+    import services.registration.BaseRegistrationService.{Responses => CommonResponses}
+    import services.registration.withId.BaseRegistrationWithIdService.{Responses => ServiceResponses}
 
-    final case class Response(ids: Seq[RegistrationService.Responses.Id], name: String, _type: Type, address: Address, contactDetails: ContactDetails)
+    final case class Response(ids: Seq[CommonResponses.Id],
+                              name: String,
+                              _type: Type,
+                              address: ServiceResponses.Address,
+                              contactDetails: ServiceResponses.ContactDetails
+    )
 
     sealed trait Type
 
@@ -96,51 +91,6 @@ object RegistrationWithIdForOrganisationService {
       case object Unknown extends Type
 
     }
-
-  }
-
-  class Converter extends RegistrationWithIdService.Converter {
-
-    private val responseTypes = Map(
-      "NotSpecified"                -> RegistrationWithIdForOrganisationService.Responses.Type.NotSpecified,
-      "Partnership"                 -> RegistrationWithIdForOrganisationService.Responses.Type.Partnership,
-      "LimitedLiabilityPartnership" -> RegistrationWithIdForOrganisationService.Responses.Type.LimitedLiabilityPartnership,
-      "CorporateBody"               -> RegistrationWithIdForOrganisationService.Responses.Type.CorporateBody,
-      "UnincorporatedBody"          -> RegistrationWithIdForOrganisationService.Responses.Type.UnincorporatedBody
-    )
-
-    def convert(request: RegistrationWithIdForOrganisationService.Requests.Request): RegistrationWithIdForOrganisationConnector.Requests.Request =
-      RegistrationWithIdForOrganisationConnector.Requests.Request(id = convert(request.id), name = request.name, _type = convert(request._type))
-
-    def convert(response: RegistrationWithIdForOrganisationConnector.Responses.Response): RegistrationWithIdForOrganisationService.Responses.Response =
-      RegistrationWithIdForOrganisationService.Responses.Response(
-        ids = response.ids.map(convert),
-        name = response.name,
-        _type = convertResponseType(response._type),
-        address = convert(response.address),
-        contactDetails = convert(response.contactDetails)
-      )
-
-    private def convert(id: RegistrationWithIdForOrganisationService.Requests.Id): RegistrationWithIdConnector.Requests.Id =
-      RegistrationWithIdConnector.Requests.Id(idType = convert(id.idType), value = id.value)
-
-    private def convert(idType: RegistrationWithIdForOrganisationService.Requests.IdType): String =
-      idType match {
-        case RegistrationWithIdForOrganisationService.Requests.IdType.EORI => "EORI"
-        case RegistrationWithIdForOrganisationService.Requests.IdType.UTR  => "UTR"
-      }
-
-    private def convert(_type: RegistrationWithIdForOrganisationService.Requests.Type): String =
-      _type match {
-        case RegistrationWithIdForOrganisationService.Requests.Type.NotSpecified                => "NotSpecified"
-        case RegistrationWithIdForOrganisationService.Requests.Type.Partnership                 => "Partnership"
-        case RegistrationWithIdForOrganisationService.Requests.Type.LimitedLiabilityPartnership => "LimitedLiabilityPartnership"
-        case RegistrationWithIdForOrganisationService.Requests.Type.CorporateBody               => "CorporateBody"
-        case RegistrationWithIdForOrganisationService.Requests.Type.UnincorporatedBody          => "UnincorporatedBody"
-      }
-
-    private def convertResponseType(_type: String): RegistrationWithIdForOrganisationService.Responses.Type =
-      responseTypes.getOrElse(_type, RegistrationWithIdForOrganisationService.Responses.Type.Unknown)
 
   }
 

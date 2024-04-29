@@ -18,45 +18,28 @@ package services.registration.withoutId
 
 import com.google.inject.{Inject, Singleton}
 import connectors.registration.withoutId.RegistrationWithoutIdForOrganisationConnector
-import services.BaseService
-import services.registration.RegistrationService
-import services.registration.withoutId.RegistrationWithoutIdForOrganisationService.Converter
-
-import scala.concurrent.{ExecutionContext, Future}
+import connectors.registration.withoutId.RegistrationWithoutIdForOrganisationConnector.{Requests => ConnectorRequests}
+import converters.registration.withoutId.RegistrationWithoutIdForOrganisationConverter
+import services.registration.withoutId.RegistrationWithoutIdForOrganisationService.{Requests => ServiceRequests}
 
 @Singleton
-class RegistrationWithoutIdForOrganisationService @Inject() (connector: RegistrationWithoutIdForOrganisationConnector) {
-
-  private val converter = new Converter
-
-  def call(request: RegistrationWithoutIdForOrganisationService.Requests.Request)(implicit
-    executionContext: ExecutionContext
-  ): Future[Either[BaseService.Responses.Errors, RegistrationService.Responses.Response]] =
-    connector.call(converter.convert(request)).map {
-      case Right(response) => Right(converter.convert(response))
-      case Left(errors)    => Left(converter.convert(errors))
-    }
-
-}
+class RegistrationWithoutIdForOrganisationService @Inject() (connector: RegistrationWithoutIdForOrganisationConnector,
+                                                             converter: RegistrationWithoutIdForOrganisationConverter
+) extends BaseRegistrationWithoutIdService[ServiceRequests.Request, ConnectorRequests.Request](
+      connector,
+      converter
+    )
 
 object RegistrationWithoutIdForOrganisationService {
 
-  import RegistrationWithoutIdService.Requests.{Address, ContactDetails}
-
   object Requests {
 
-    final case class Request(name: String, address: Address, contactDetails: ContactDetails)
+    import services.registration.withoutId.BaseRegistrationWithoutIdService.{Requests => CommonRegistrationWithoutIdRequests}
 
-  }
-
-  class Converter extends RegistrationWithoutIdService.Converter {
-
-    def convert(request: RegistrationWithoutIdForOrganisationService.Requests.Request): RegistrationWithoutIdForOrganisationConnector.Requests.Request =
-      RegistrationWithoutIdForOrganisationConnector.Requests.Request(
-        name = request.name,
-        address = convert(request.address),
-        contactDetails = convert(request.contactDetails)
-      )
+    final case class Request(name: String,
+                             address: CommonRegistrationWithoutIdRequests.Address,
+                             contactDetails: CommonRegistrationWithoutIdRequests.ContactDetails
+    )
 
   }
 

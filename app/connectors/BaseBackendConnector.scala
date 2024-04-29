@@ -16,9 +16,21 @@
 
 package connectors
 
+import config.FrontendAppConfig
 import play.api.libs.ws.WSClient
+import uk.gov.hmrc.http.StringContextOps
 
-abstract class BaseBackendConnector(wsClient: WSClient) extends BaseConnector(wsClient) {}
+import java.net.URL
+
+abstract class BaseBackendConnector[REQUEST, RESPONSE](frontendAppConfig: FrontendAppConfig, wsClient: WSClient)
+    extends BaseConnector[REQUEST, RESPONSE](wsClient) {
+
+  final override def url(): URL =
+    url"${frontendAppConfig.baseUrlForBackendConnector + connectorPath}"
+
+  def connectorPath: String
+
+}
 
 object BaseBackendConnector {
   val connectorName: String = "backend"

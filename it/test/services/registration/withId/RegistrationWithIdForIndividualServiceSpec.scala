@@ -16,17 +16,18 @@
 
 package services.registration.withId
 
-import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, equalToJson, post, stubFor, urlEqualTo}
-import connectors.BaseConnector
+import com.github.tomakehurst.wiremock.client.WireMock._
+import connectors.BaseConnector.Exceptions.ResponseParsingException
 import connectors.registration.withId.RegistrationWithIdForIndividualConnector
 import play.api.http.Status.{BAD_REQUEST, INTERNAL_SERVER_ERROR, OK, SERVICE_UNAVAILABLE}
-import services.BaseService.Responses.Error
-import services.registration.RegistrationService
-import services.{BaseBackendConnectorIntSpec, BaseService}
-import services.registration.withId.RegistrationWithIdService.{Responses => CommonResponses}
-import services.registration.withId.RegistrationWithIdForIndividualService.{Requests => ServiceRequests, Responses => ServiceResponses}
+import services.BaseBackendConnectorSpec
+import services.BaseService.{Responses => CommonResponses}
+import services.registration.BaseRegistrationService.{Responses => CommonRegistrationResponses}
+import services.registration.withId.BaseRegistrationWithIdService.{Responses => CommonRegistrationWithIdResponses}
+import services.registration.withId.RegistrationWithIdForIndividualService.Requests
+import services.registration.withId.RegistrationWithIdForIndividualService.Requests.Request
 
-class RegistrationWithIdForIndividualServiceSpec extends BaseBackendConnectorIntSpec {
+class RegistrationWithIdForIndividualServiceSpec extends BaseBackendConnectorSpec {
 
   private val connectorPath: String = RegistrationWithIdForIndividualConnector.connectorPath
   private lazy val service          = app.injector.instanceOf[RegistrationWithIdForIndividualService]
@@ -91,9 +92,9 @@ class RegistrationWithIdForIndividualServiceSpec extends BaseBackendConnectorInt
             )
         )
 
-        val request = ServiceRequests.Request(
-          id = ServiceRequests.Id(
-            idType = ServiceRequests.IdType.NINO,
+        val request = Request(
+          id = Requests.Id(
+            idType = Requests.IdType.NINO,
             value = "AA000000A"
           ),
           firstName = "Patrick",
@@ -105,27 +106,27 @@ class RegistrationWithIdForIndividualServiceSpec extends BaseBackendConnectorInt
         val response = await(service.call(request))
 
         response shouldBe Right(
-          ServiceResponses.Response(
+          RegistrationWithIdForIndividualService.Responses.Response(
             ids = Seq(
-              RegistrationService.Responses.Id(RegistrationService.Responses.IdType.ARN, "WARN3849921"),
-              RegistrationService.Responses.Id(RegistrationService.Responses.IdType.SAFE, "XE0000200775706"),
-              RegistrationService.Responses.Id(RegistrationService.Responses.IdType.SAP, "1960629967")
+              CommonRegistrationResponses.Id(CommonRegistrationResponses.IdType.ARN, "WARN3849921"),
+              CommonRegistrationResponses.Id(CommonRegistrationResponses.IdType.SAFE, "XE0000200775706"),
+              CommonRegistrationResponses.Id(CommonRegistrationResponses.IdType.SAP, "1960629967")
             ),
             firstName = "Patrick",
             middleName = Some("John"),
             lastName = "Dyson",
             dateOfBirth = Some("1970-10-04"),
-            address = CommonResponses.Address(lineOne = "26424 Cecelia Junction",
-                                              lineTwo = Some("Suite 858"),
-                                              lineThree = Some(""),
-                                              lineFour = Some("West Siobhanberg"),
-                                              postalCode = "OX2 3HD",
-                                              countryCode = "AD"
+            address = CommonRegistrationWithIdResponses.Address(lineOne = "26424 Cecelia Junction",
+                                                                lineTwo = Some("Suite 858"),
+                                                                lineThree = Some(""),
+                                                                lineFour = Some("West Siobhanberg"),
+                                                                postalCode = "OX2 3HD",
+                                                                countryCode = "AD"
             ),
-            contactDetails = CommonResponses.ContactDetails(landline = Some("747663966"),
-                                                            mobile = Some("38390756243"),
-                                                            fax = Some("58371813020"),
-                                                            emailAddress = Some("Patrick.Dyson@example.com")
+            contactDetails = CommonRegistrationWithIdResponses.ContactDetails(landline = Some("747663966"),
+                                                                              mobile = Some("38390756243"),
+                                                                              fax = Some("58371813020"),
+                                                                              emailAddress = Some("Patrick.Dyson@example.com")
             )
           )
         )
@@ -133,7 +134,7 @@ class RegistrationWithIdForIndividualServiceSpec extends BaseBackendConnectorInt
         verifyThatDownstreamApiWasCalled()
       }
       "fails, where the response body is" - {
-        "valid, with a status code of" - {
+        "absent, with a status code of" - {
           "internal service error" in {
             stubFor(
               post(urlEqualTo(connectorPath))
@@ -156,9 +157,9 @@ class RegistrationWithIdForIndividualServiceSpec extends BaseBackendConnectorInt
                 )
             )
 
-            val request = ServiceRequests.Request(
-              id = ServiceRequests.Id(
-                idType = ServiceRequests.IdType.NINO,
+            val request = Request(
+              id = Requests.Id(
+                idType = Requests.IdType.NINO,
                 value = "AA000000A"
               ),
               firstName = "Patrick",
@@ -169,10 +170,11 @@ class RegistrationWithIdForIndividualServiceSpec extends BaseBackendConnectorInt
 
             val response = await(service.call(request))
 
-            response shouldBe Left(BaseService.Responses.Errors(INTERNAL_SERVER_ERROR))
+            response shouldBe Left(CommonResponses.Errors(INTERNAL_SERVER_ERROR))
             verifyThatDownstreamApiWasCalled()
           }
-
+        }
+        "valid, with a status code of" - {
           "service unavailable" in {
             stubFor(
               post(urlEqualTo(connectorPath))
@@ -202,9 +204,9 @@ class RegistrationWithIdForIndividualServiceSpec extends BaseBackendConnectorInt
                 )
             )
 
-            val request = ServiceRequests.Request(
-              id = ServiceRequests.Id(
-                idType = ServiceRequests.IdType.NINO,
+            val request = Request(
+              id = Requests.Id(
+                idType = Requests.IdType.NINO,
                 value = "AA000000A"
               ),
               firstName = "Patrick",
@@ -216,10 +218,10 @@ class RegistrationWithIdForIndividualServiceSpec extends BaseBackendConnectorInt
             val response = await(service.call(request))
 
             response shouldBe Left(
-              BaseService.Responses.Errors(
+              CommonResponses.Errors(
                 SERVICE_UNAVAILABLE,
                 Seq(
-                  Error("eis-returned-service-unavailable")
+                  CommonResponses.Error("eis-returned-service-unavailable")
                 )
               )
             )
@@ -257,9 +259,9 @@ class RegistrationWithIdForIndividualServiceSpec extends BaseBackendConnectorInt
                 )
             )
 
-            val request = ServiceRequests.Request(
-              id = ServiceRequests.Id(
-                idType = ServiceRequests.IdType.NINO,
+            val request = Request(
+              id = Requests.Id(
+                idType = Requests.IdType.NINO,
                 value = "AA000000A"
               ),
               firstName = "Patrick",
@@ -271,11 +273,11 @@ class RegistrationWithIdForIndividualServiceSpec extends BaseBackendConnectorInt
             val response = await(service.call(request))
 
             response shouldBe Left(
-              BaseService.Responses.Errors(
+              CommonResponses.Errors(
                 BAD_REQUEST,
                 Seq(
-                  Error("invalid-last-name"),
-                  Error("invalid-date-of-birth")
+                  CommonResponses.Error("invalid-last-name"),
+                  CommonResponses.Error("invalid-date-of-birth")
                 )
               )
             )
@@ -312,9 +314,9 @@ class RegistrationWithIdForIndividualServiceSpec extends BaseBackendConnectorInt
                 )
             )
 
-            val request = ServiceRequests.Request(
-              id = ServiceRequests.Id(
-                idType = ServiceRequests.IdType.NINO,
+            val request = Request(
+              id = Requests.Id(
+                idType = Requests.IdType.NINO,
                 value = "AA000000A"
               ),
               firstName = "Patrick",
@@ -323,7 +325,7 @@ class RegistrationWithIdForIndividualServiceSpec extends BaseBackendConnectorInt
               dateOfBirth = "1970-10-04"
             )
 
-            assertThrows[BaseConnector.Exceptions.ResponseParsingException] {
+            assertThrows[ResponseParsingException] {
               await(service.call(request))
             }
             verifyThatDownstreamApiWasCalled()
@@ -372,9 +374,9 @@ class RegistrationWithIdForIndividualServiceSpec extends BaseBackendConnectorInt
                 )
             )
 
-            val request = ServiceRequests.Request(
-              id = ServiceRequests.Id(
-                idType = ServiceRequests.IdType.NINO,
+            val request = Request(
+              id = Requests.Id(
+                idType = Requests.IdType.NINO,
                 value = "AA000000A"
               ),
               firstName = "Patrick",
@@ -383,7 +385,7 @@ class RegistrationWithIdForIndividualServiceSpec extends BaseBackendConnectorInt
               dateOfBirth = "1970-10-04"
             )
 
-            assertThrows[BaseConnector.Exceptions.ResponseParsingException] {
+            assertThrows[ResponseParsingException] {
               await(service.call(request))
             }
 

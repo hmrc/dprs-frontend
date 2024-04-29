@@ -17,16 +17,18 @@
 package services.registration.withId
 
 import com.github.tomakehurst.wiremock.client.WireMock._
-import connectors.BaseConnector
+import connectors.BaseConnector.Exceptions.ResponseParsingException
 import connectors.registration.withId.RegistrationWithIdForOrganisationConnector
 import play.api.http.Status.{BAD_REQUEST, INTERNAL_SERVER_ERROR, OK, SERVICE_UNAVAILABLE}
-import services.BaseService.Responses.Error
-import services.registration.RegistrationService
-import services.registration.withId.RegistrationWithIdForOrganisationService.{Requests => ServiceRequests, Responses => ServiceResponses}
-import services.registration.withId.RegistrationWithIdService.{Responses => CommonServiceResponses}
-import services.{BaseBackendConnectorIntSpec, BaseService}
+import services.BaseBackendConnectorSpec
+import services.BaseService.{Responses => CommonResponses}
+import services.registration.BaseRegistrationService.{Responses => CommonRegistrationResponses}
+import services.registration.withId.BaseRegistrationWithIdService.{Responses => CommonRegistrationWithIdResponses}
+import services.registration.withId.RegistrationWithIdForOrganisationService.Requests.Request
+import services.registration.withId.RegistrationWithIdForOrganisationService.Responses.Response
+import services.registration.withId.RegistrationWithIdForOrganisationService.{Requests, Responses}
 
-class RegistrationWithIdForOrganisationServiceSpec extends BaseBackendConnectorIntSpec {
+class RegistrationWithIdForOrganisationServiceSpec extends BaseBackendConnectorSpec {
 
   private val connectorPath: String = RegistrationWithIdForOrganisationConnector.connectorPath
   private lazy val service          = app.injector.instanceOf[RegistrationWithIdForOrganisationService]
@@ -87,37 +89,37 @@ class RegistrationWithIdForOrganisationServiceSpec extends BaseBackendConnectorI
             )
         )
 
-        val request = ServiceRequests.Request(
-          id = ServiceRequests.Id(
-            idType = ServiceRequests.IdType.UTR,
+        val request = Request(
+          id = Requests.Id(
+            idType = Requests.IdType.UTR,
             value = "1234567890"
           ),
           name = "Dyson",
-          _type = ServiceRequests.Type.CorporateBody
+          _type = Requests.Type.CorporateBody
         )
 
         val response = await(service.call(request))
 
         response shouldBe Right(
-          ServiceResponses.Response(
+          Response(
             ids = Seq(
-              RegistrationService.Responses.Id(RegistrationService.Responses.IdType.ARN, "WARN1442450"),
-              RegistrationService.Responses.Id(RegistrationService.Responses.IdType.SAFE, "XE0000586571722"),
-              RegistrationService.Responses.Id(RegistrationService.Responses.IdType.SAP, "8231791429")
+              CommonRegistrationResponses.Id(CommonRegistrationResponses.IdType.ARN, "WARN1442450"),
+              CommonRegistrationResponses.Id(CommonRegistrationResponses.IdType.SAFE, "XE0000586571722"),
+              CommonRegistrationResponses.Id(CommonRegistrationResponses.IdType.SAP, "8231791429")
             ),
             name = "Dyson",
-            _type = ServiceResponses.Type.CorporateBody,
-            address = CommonServiceResponses.Address(lineOne = "2627 Gus Hill",
-                                                     lineTwo = Some("Apt. 898"),
-                                                     lineThree = Some(""),
-                                                     lineFour = Some("West Corrinamouth"),
-                                                     postalCode = "OX2 3HD",
-                                                     countryCode = "AD"
+            _type = Responses.Type.CorporateBody,
+            address = CommonRegistrationWithIdResponses.Address(lineOne = "2627 Gus Hill",
+                                                                lineTwo = Some("Apt. 898"),
+                                                                lineThree = Some(""),
+                                                                lineFour = Some("West Corrinamouth"),
+                                                                postalCode = "OX2 3HD",
+                                                                countryCode = "AD"
             ),
-            contactDetails = CommonServiceResponses.ContactDetails(landline = Some("176905117"),
-                                                                   mobile = Some("62281724761"),
-                                                                   fax = Some("08959633679"),
-                                                                   emailAddress = Some("edward.goodenough@example.com")
+            contactDetails = CommonRegistrationWithIdResponses.ContactDetails(landline = Some("176905117"),
+                                                                              mobile = Some("62281724761"),
+                                                                              fax = Some("08959633679"),
+                                                                              emailAddress = Some("edward.goodenough@example.com")
             )
           )
         )
@@ -125,7 +127,7 @@ class RegistrationWithIdForOrganisationServiceSpec extends BaseBackendConnectorI
         verifyThatDownstreamApiWasCalled()
       }
       "fails, where the response body is" - {
-        "valid, with a status code of" - {
+        "absent, with a status code of" - {
           "internal service error" in {
             stubFor(
               post(urlEqualTo(connectorPath))
@@ -146,20 +148,22 @@ class RegistrationWithIdForOrganisationServiceSpec extends BaseBackendConnectorI
                 )
             )
 
-            val request = ServiceRequests.Request(
-              id = ServiceRequests.Id(
-                idType = ServiceRequests.IdType.UTR,
+            val request = Request(
+              id = Requests.Id(
+                idType = Requests.IdType.UTR,
                 value = "1234567890"
               ),
               name = "Dyson",
-              _type = ServiceRequests.Type.CorporateBody
+              _type = Requests.Type.CorporateBody
             )
 
             val response = await(service.call(request))
 
-            response shouldBe Left(BaseService.Responses.Errors(INTERNAL_SERVER_ERROR))
+            response shouldBe Left(CommonResponses.Errors(INTERNAL_SERVER_ERROR))
             verifyThatDownstreamApiWasCalled()
           }
+        }
+        "valid, with a status code of" - {
           "service unavailable" in {
             stubFor(
               post(urlEqualTo(connectorPath))
@@ -187,22 +191,22 @@ class RegistrationWithIdForOrganisationServiceSpec extends BaseBackendConnectorI
                 )
             )
 
-            val request = ServiceRequests.Request(
-              id = ServiceRequests.Id(
-                idType = ServiceRequests.IdType.UTR,
+            val request = Request(
+              id = Requests.Id(
+                idType = Requests.IdType.UTR,
                 value = "1234567890"
               ),
               name = "Dyson",
-              _type = ServiceRequests.Type.CorporateBody
+              _type = Requests.Type.CorporateBody
             )
 
             val response = await(service.call(request))
 
             response shouldBe Left(
-              BaseService.Responses.Errors(
+              CommonResponses.Errors(
                 SERVICE_UNAVAILABLE,
                 Seq(
-                  Error("eis-returned-service-unavailable")
+                  CommonResponses.Error("eis-returned-service-unavailable")
                 )
               )
             )
@@ -238,23 +242,23 @@ class RegistrationWithIdForOrganisationServiceSpec extends BaseBackendConnectorI
                 )
             )
 
-            val request = ServiceRequests.Request(
-              id = ServiceRequests.Id(
-                idType = ServiceRequests.IdType.UTR,
+            val request = Request(
+              id = Requests.Id(
+                idType = Requests.IdType.UTR,
                 value = "1234567890"
               ),
               name = "Dyson",
-              _type = ServiceRequests.Type.CorporateBody
+              _type = Requests.Type.CorporateBody
             )
 
             val response = await(service.call(request))
 
             response shouldBe Left(
-              BaseService.Responses.Errors(
+              CommonResponses.Errors(
                 BAD_REQUEST,
                 Seq(
-                  Error("invalid-name"),
-                  Error("invalid-type")
+                  CommonResponses.Error("invalid-name"),
+                  CommonResponses.Error("invalid-type")
                 )
               )
             )
@@ -289,16 +293,16 @@ class RegistrationWithIdForOrganisationServiceSpec extends BaseBackendConnectorI
                 )
             )
 
-            val request = ServiceRequests.Request(
-              id = ServiceRequests.Id(
-                idType = ServiceRequests.IdType.UTR,
+            val request = Request(
+              id = Requests.Id(
+                idType = Requests.IdType.UTR,
                 value = "1234567890"
               ),
               name = "Dyson",
-              _type = ServiceRequests.Type.CorporateBody
+              _type = Requests.Type.CorporateBody
             )
 
-            assertThrows[BaseConnector.Exceptions.ResponseParsingException] {
+            assertThrows[ResponseParsingException] {
               await(service.call(request))
             }
             verifyThatDownstreamApiWasCalled()
@@ -356,16 +360,16 @@ class RegistrationWithIdForOrganisationServiceSpec extends BaseBackendConnectorI
                 )
             )
 
-            val request = ServiceRequests.Request(
-              id = ServiceRequests.Id(
-                idType = ServiceRequests.IdType.UTR,
+            val request = Request(
+              id = Requests.Id(
+                idType = Requests.IdType.UTR,
                 value = "1234567890"
               ),
               name = "Dyson",
-              _type = ServiceRequests.Type.CorporateBody
+              _type = Requests.Type.CorporateBody
             )
 
-            assertThrows[BaseConnector.Exceptions.ResponseParsingException] {
+            assertThrows[ResponseParsingException] {
               await(service.call(request))
             }
             verifyThatDownstreamApiWasCalled()
