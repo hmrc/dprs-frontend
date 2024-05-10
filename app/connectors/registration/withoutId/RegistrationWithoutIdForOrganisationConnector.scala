@@ -43,7 +43,7 @@ class RegistrationWithoutIdForOrganisationConnector @Inject() (frontendAppConfig
 
 object RegistrationWithoutIdForOrganisationConnector {
 
-  val connectorPath: String = "/registrations/withoutId/organisation"
+  val connectorPath: String = "/dprs/registrations/withoutId/organisation"
 
   object Requests {
 

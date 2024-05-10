@@ -36,8 +36,9 @@ abstract class BaseConnectorSpec extends AnyFreeSpec with Matchers with ScalaFut
   def connectorName: String
 
   def extraApplicationConfig: Map[String, Any] = Map(
-    s"microservice.services.$connectorName.host" -> wireMockHost,
-    s"microservice.services.$connectorName.port" -> wireMockPort
+    s"microservice.services.$connectorName.host"    -> wireMockHost,
+    s"microservice.services.$connectorName.port"    -> wireMockPort,
+    s"microservice.services.$connectorName.context" -> ""
   )
 
   def await[T](awaitable: Awaitable[T]): T = Await.result(awaitable, 1.second)

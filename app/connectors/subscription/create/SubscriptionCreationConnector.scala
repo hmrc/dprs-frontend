@@ -42,7 +42,7 @@ class SubscriptionCreationConnector @Inject() (frontendAppConfig: FrontendAppCon
 
 object SubscriptionCreationConnector {
 
-  val connectorPath: String = "/subscriptions"
+  val connectorPath: String = "/dprs/subscriptions"
 
   object Requests {
 

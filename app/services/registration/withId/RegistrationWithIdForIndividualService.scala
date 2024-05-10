@@ -47,6 +47,7 @@ object RegistrationWithIdForIndividualService {
       case object EORI extends IdType
       case object NINO extends IdType
       case object UTR extends IdType
+      case object UNKNOWN extends IdType
 
     }
 

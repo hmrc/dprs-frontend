@@ -33,7 +33,12 @@ class FrontendAppConfig @Inject() (configuration: Configuration) {
   val countdown: Int = configuration.get[Int]("timeout-dialog.countdown")
   val cacheTtl: Int  = configuration.get[Int]("mongodb.timeToLiveInSeconds")
 
-  val baseUrlForBackendConnector: String = generateBaseUrl(BaseBackendConnector.connectorName)
+  val baseUrlForBackendConnector: String = {
+    val root    = "microservice.services.backend"
+    val baseUrl = configuration.get[Service](root).baseUrl
+    val context = configuration.get[String](root + ".context")
+    baseUrl + context
+  }
 
   val host: String    = configuration.get[String]("host")
   val appName: String = configuration.get[String]("appName")
@@ -53,8 +58,5 @@ class FrontendAppConfig @Inject() (configuration: Configuration) {
     "en" -> Lang("en"),
     "cy" -> Lang("cy")
   )
-
-  private def generateBaseUrl(serviceName: String): String =
-    configuration.get[Service](s"microservice.services.$serviceName").baseUrl
 
 }

@@ -1,0 +1,265 @@
+{
+	"info": {
+		"_postman_id": "18e2d8ac-1c44-4b17-8d23-2d69cd9e6c50",
+		"name": "Frontend Testing",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "30217849"
+	},
+	"item": [
+		{
+			"name": "Registration",
+			"item": [
+				{
+					"name": "Individual",
+					"item": [
+						{
+							"name": "Success",
+							"item": [
+								{
+									"name": "Success",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is as expected\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});",
+													"",
+													"pm.test(\"Has the expected SAFE ID\", function () {",
+													"    pm.expect(pm.response.json().ids[1].type).to.eql(\"SAFE\");",
+													"    pm.expect(pm.response.json().ids[1].value).to.eql(\"XE0000200775706\");",
+													"});",
+													"",
+													""
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n  \"id\": {\n    \"type\": \"NINO\",\n    \"value\": \"AA000000A\"\n  },\n  \"firstName\": \"Patrick\",\n  \"lastName\": \"Dyson\",\n  \"dateOfBirth\": \"1970-10-04\"\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{BASE_URL}}/registrations/withId/individual",
+											"host": [
+												"{{BASE_URL}}"
+											],
+											"path": [
+												"registrations",
+												"withId",
+												"individual"
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						},
+						{
+							"name": "Failure",
+							"item": [
+								{
+									"name": "Downstream",
+									"item": [
+										{
+											"name": "Internal Server Error",
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"exec": [
+															"pm.test(\"Status code is as expected\", function () {",
+															"    pm.response.to.have.status(500);",
+															"});",
+															"",
+															"pm.test(\"Body is as expected\", function () {",
+															"    var jsonData = pm.response.json();",
+															"    pm.expect(jsonData.status).to.eql(503);",
+															"    pm.expect(jsonData.errors.length).to.equal(1);",
+															"    pm.expect(jsonData.errors[0].code).to.eql(\"eis-returned-internal-server-error\");",
+															"});",
+															"",
+															""
+														],
+														"type": "text/javascript",
+														"packages": {}
+													}
+												}
+											],
+											"request": {
+												"method": "POST",
+												"header": [],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n  \"id\": {\n    \"type\": \"NINO\",\n    \"value\": \"000000500\"\n  },\n  \"firstName\": \"Patrick\",\n  \"lastName\": \"Dyson\",\n  \"dateOfBirth\": \"1970-10-04\"\n}",
+													"options": {
+														"raw": {
+															"language": "json"
+														}
+													}
+												},
+												"url": {
+													"raw": "{{BASE_URL}}/registrations/withId/individual",
+													"host": [
+														"{{BASE_URL}}"
+													],
+													"path": [
+														"registrations",
+														"withId",
+														"individual"
+													]
+												}
+											},
+											"response": []
+										},
+										{
+											"name": "Bad Request",
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"exec": [
+															"pm.test(\"Status code is as expected\", function () {",
+															"    pm.response.to.have.status(500);",
+															"});",
+															"",
+															"pm.test(\"Body is as expected\", function () {",
+															"    var jsonData = pm.response.json();",
+															"    pm.expect(jsonData.status).to.eql(500);",
+															"    pm.expect(jsonData.errors.length).to.equal(0);",
+															"});",
+															"",
+															""
+														],
+														"type": "text/javascript",
+														"packages": {}
+													}
+												}
+											],
+											"request": {
+												"method": "POST",
+												"header": [],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n  \"id\": {\n    \"type\": \"NINO\",\n    \"value\": \"000000400\"\n  },\n  \"firstName\": \"Patrick\",\n  \"lastName\": \"Dyson\",\n  \"dateOfBirth\": \"1970-10-04\"\n}",
+													"options": {
+														"raw": {
+															"language": "json"
+														}
+													}
+												},
+												"url": {
+													"raw": "{{BASE_URL}}/registrations/withId/individual",
+													"host": [
+														"{{BASE_URL}}"
+													],
+													"path": [
+														"registrations",
+														"withId",
+														"individual"
+													]
+												}
+											},
+											"response": []
+										},
+										{
+											"name": "Service Unavailable",
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"exec": [
+															"pm.test(\"Status code is as expected\", function () {",
+															"    pm.response.to.have.status(500);",
+															"});",
+															"",
+															"pm.test(\"Body is as expected\", function () {",
+															"    var jsonData = pm.response.json();",
+															"    pm.expect(jsonData.status).to.eql(503);",
+															"    pm.expect(jsonData.errors.length).to.equal(1);",
+															"    pm.expect(jsonData.errors[0].code).to.eql(\"eis-returned-internal-server-error\");",
+															"});",
+															"",
+															""
+														],
+														"type": "text/javascript",
+														"packages": {}
+													}
+												}
+											],
+											"request": {
+												"method": "POST",
+												"header": [],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n  \"id\": {\n    \"type\": \"NINO\",\n    \"value\": \"000000500\"\n  },\n  \"firstName\": \"Patrick\",\n  \"lastName\": \"Dyson\",\n  \"dateOfBirth\": \"1970-10-04\"\n}",
+													"options": {
+														"raw": {
+															"language": "json"
+														}
+													}
+												},
+												"url": {
+													"raw": "{{BASE_URL}}/registrations/withId/individual",
+													"host": [
+														"{{BASE_URL}}"
+													],
+													"path": [
+														"registrations",
+														"withId",
+														"individual"
+													]
+												}
+											},
+											"response": []
+										}
+									]
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "BASE_URL",
+			"value": "http://localhost:20002/test-only",
+			"type": "string"
+		}
+	]
+}
