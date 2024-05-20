@@ -61,6 +61,11 @@ final case class UserAnswers(
       page.cleanup(None, updatedAnswers)
     }
   }
+
+  /*
+   * We need a way to tell us if data has changed because page
+   * navigation ic CheckMode depends on that.
+   */
 }
 
 object UserAnswers {

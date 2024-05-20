@@ -16,6 +16,11 @@
 
 package config
 
+/*
+ * Everything under 'app' apart from 'assets' needs to be moved to
+ * 'uk.gov.hmrc.dprs'
+ */
+
 import com.google.inject.{Inject, Singleton}
 import connectors.BaseBackendConnector
 import play.api.Configuration

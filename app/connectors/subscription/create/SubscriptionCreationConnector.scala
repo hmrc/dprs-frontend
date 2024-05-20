@@ -47,6 +47,11 @@ object SubscriptionCreationConnector {
   object Requests {
 
     final case class Request(id: Id, name: Option[String], contacts: Seq[Contact])
+    /*
+     * Why is 'name' an Option[String]?
+     * Are we expecting one of two contacts?
+     * Can we throw an exception if the Seq is empty or has more than 2 items?
+     */
 
     object Request {
       implicit lazy val writes: OWrites[Request] =
@@ -56,6 +61,10 @@ object SubscriptionCreationConnector {
     }
 
     final case class Id(idType: String, value: String)
+    /*
+     * This is used in other requests.
+     * Can you make it part of a base class?
+     */
 
     object Id {
       implicit lazy val writes: OWrites[Id] =
@@ -79,6 +88,10 @@ object SubscriptionCreationConnector {
     }
 
     final case class Individual(typeCode: String,
+      /*
+       * This is in Organisation too.
+       * Can't you make it part of Contact?
+       */
                                 firstName: String,
                                 middleName: Option[String],
                                 lastName: String,

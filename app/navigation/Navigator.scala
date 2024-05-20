@@ -26,6 +26,23 @@ import models._
 @Singleton
 class Navigator @Inject() () {
 
+/*
+ * I think it will be cleaner to have this class as abstract
+ * and to have each controller have its own concrete page
+ * navigator.
+ *
+ * We can add the following to be implemented in each of
+ * the concrete classes.
+ *
+ * def navigateInNormalMode(answers: UserAnswers): Call
+ *
+ * In CheckMode, we always go back to CYA if the data has not changed
+ * so this can be implemented here. If the data has changed then we may
+ * or nat not go back to CYA so we need a method like the following
+ *
+ * def navigateInCheckMode(answers: UserAnswers): Call
+ */
+
   private val normalRoutes: Page => UserAnswers => Call = { case _ =>
     _ => routes.IndexController.onPageLoad
   }

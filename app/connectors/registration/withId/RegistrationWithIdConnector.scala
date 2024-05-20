@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package connectors.registration.withId
+package connectors.registration.withId // Lowercase for package names?
 
 import config.FrontendAppConfig
 import connectors.registration.RegistrationConnector
@@ -25,11 +25,18 @@ import play.api.libs.ws.WSClient
 abstract class RegistrationWithIdConnector[REQUEST, RESPONSE](frontendAppConfig: FrontendAppConfig, wsClient: WSClient)
     extends RegistrationConnector[REQUEST, RESPONSE](frontendAppConfig, wsClient)
 
+/*
+ * I can't see an equivalent in the 'withoutId' package.
+ * Is that intentional?
+ */
 object RegistrationWithIdConnector {
 
   object Requests {
 
     final case class Id(idType: String, value: String)
+    /*
+     * Wouldn't idType be better as a sealed trait on FE and BE?
+     */
 
     object Id {
       implicit lazy val writes: OWrites[Id] =
@@ -46,7 +53,7 @@ object RegistrationWithIdConnector {
                              lineThree: Option[String],
                              lineFour: Option[String],
                              postalCode: String,
-                             countryCode: String
+                             countryCode: String // This is one of a fixed set so sealed train?
     )
 
     object Address {

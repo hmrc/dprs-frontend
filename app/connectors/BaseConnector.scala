@@ -29,6 +29,12 @@ import scala.util.{Failure, Success, Try}
 
 abstract class BaseConnector[REQUEST, RESPONSE](wsClient: WSClient) {
 
+/*
+ * You probably have this base class as you expect the frontend to connect to different
+ * things than the our backend. I think it would be cleaner if the FE went through the
+ * BE for everything.
+ */
+
   def call(request: REQUEST)(implicit executionContext: ExecutionContext): Future[Either[BaseConnector.Responses.Errors, RESPONSE]]
 
   /** We would have liked to use HttpClientV2, but when it encounters a 400 or 500 status code, the response body is inaccessible.

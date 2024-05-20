@@ -43,6 +43,7 @@ class SessionRepository @Inject() (
       indexes = Seq(
         IndexModel(
           Indexes.ascending("lastUpdated"),
+          // Collection should be indexed by '_id'
           IndexOptions()
             .name("lastUpdatedIdx")
             .expireAfter(appConfig.cacheTtl, TimeUnit.SECONDS)
