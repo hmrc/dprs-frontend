@@ -37,7 +37,7 @@ class RegistrationWithoutIdForOrganisationConnector @Inject() (frontendAppConfig
   override def call(request: ConnectorRequests.Request)(implicit
     executionContext: ExecutionContext
   ): Future[Either[BaseConnector.Responses.Errors, ConnectorResponses.Response]] =
-    post(request)
+    post(baseUrl(), request)
 
 }
 

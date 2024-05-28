@@ -33,13 +33,13 @@ abstract class BaseConnector[REQUEST, RESPONSE](wsClient: WSClient) {
 
   /** We would have liked to use HttpClientV2, but when it encounters a 400 or 500 status code, the response body is inaccessible.
     */
-  def post(request: REQUEST)(implicit
+  def post(url: URL, request: REQUEST)(implicit
     executionContext: ExecutionContext,
     writes: Writes[REQUEST],
     reads: Reads[RESPONSE]
   ): Future[Either[Errors, RESPONSE]] =
     wsClient
-      .url(url().toString)
+      .url(url.toString)
       .post(toJson(request))
       .transform {
         case Success(wsResponse) =>
@@ -50,7 +50,7 @@ abstract class BaseConnector[REQUEST, RESPONSE](wsClient: WSClient) {
         case Failure(exception) => Failure(exception)
       }
 
-  def url(): URL
+  def baseUrl(): URL
 
   private def asResponse(wsResponse: WSResponse)(implicit reads: Reads[RESPONSE]): Try[Either[Errors, RESPONSE]] =
     wsResponse.json
@@ -84,5 +84,4 @@ object BaseConnector {
         (JsPath \ "code").read[String].map(Error(_))
     }
   }
-
 }

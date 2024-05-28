@@ -14,31 +14,22 @@
  * limitations under the License.
  */
 
-package converters.subscription.create
+package converters.subscription.update
 
 import connectors.subscription.SubscriptionConnector.{Requests => ConnectorDataRequests, Responses => ConnectorResponses}
-import connectors.subscription.create.SubscriptionCreationConnector.{Requests => ConnectorCreateRequests}
+import connectors.subscription.update.SubscriptionUpdateConnector.{Requests => ConnectorUpdateRequests}
 import converters.BaseConverter
 import services.subscription.SubscriptionService.{Requests => ServiceDataRequests, Responses => ServiceResponses}
-import services.subscription.create.SubscriptionCreationService.{Requests => ServiceCreateRequests}
+import services.subscription.update.SubscriptionUpdateService.{Requests => ServiceCreateRequests}
 
-class SubscriptionCreationConverter
-    extends BaseConverter[ServiceCreateRequests.Request, ConnectorCreateRequests.Request, ConnectorResponses.Response, ServiceResponses.Response] {
+class SubscriptionUpdateConverter
+    extends BaseConverter[ServiceCreateRequests.Request, ConnectorUpdateRequests.Request, ConnectorResponses.Response, ServiceResponses.Response] {
 
-  override def convertServiceRequest(request: ServiceCreateRequests.Request): ConnectorCreateRequests.Request =
-    ConnectorCreateRequests.Request(id = convert(request.id), name = request.name, contacts = request.contacts.map(convert))
+  override def convertServiceRequest(request: ServiceCreateRequests.Request): ConnectorUpdateRequests.Request =
+    ConnectorUpdateRequests.Request(id = request.id, name = request.name, contacts = request.contacts.map(convert))
 
   override def convertSuccessfulConnectorResponse(response: ConnectorResponses.Response): ServiceResponses.Response =
-    ServiceResponses.Response(response.id)
-
-  private def convert(id: ServiceCreateRequests.Id): ConnectorCreateRequests.Id =
-    ConnectorCreateRequests.Id(convert(id.idType), id.value)
-
-  private def convert(idType: ServiceCreateRequests.IdType): String = idType match {
-    case ServiceCreateRequests.IdType.NINO => "NINO"
-    case ServiceCreateRequests.IdType.SAFE => "SAFE"
-    case ServiceCreateRequests.IdType.UTR  => "UTR"
-  }
+    ServiceResponses.Response("OK")
 
   private def convert(contact: ServiceDataRequests.Contact): ConnectorDataRequests.Contact =
     contact match {

@@ -14,45 +14,28 @@
  * limitations under the License.
  */
 
-package services.subscription.create
+package services.subscription.update
 
 import com.google.inject.{Inject, Singleton}
-import connectors.subscription.create.SubscriptionCreationConnector
-import connectors.subscription.create.SubscriptionCreationConnector.{Requests => ConnectorRequests}
 import connectors.subscription.SubscriptionConnector.{Responses => ConnectorResponses}
-import converters.subscription.create.SubscriptionCreationConverter
+import connectors.subscription.update.SubscriptionUpdateConnector
+import connectors.subscription.update.SubscriptionUpdateConnector.{Requests => ConnectorRequests}
+import converters.subscription.update.SubscriptionUpdateConverter
 import services.BaseService
 import services.subscription.SubscriptionService.Requests.Contact
-import services.subscription.create.SubscriptionCreationService.{Requests => ServiceRequests}
+import services.subscription.update.SubscriptionUpdateService.{Requests => ServiceRequests}
 import services.subscription.SubscriptionService.{Responses => ServiceResponses}
 
 @Singleton
-class SubscriptionCreationService @Inject() (connector: SubscriptionCreationConnector, converter: SubscriptionCreationConverter)
+class SubscriptionUpdateService @Inject() (connector: SubscriptionUpdateConnector, converter: SubscriptionUpdateConverter)
     extends BaseService[ServiceRequests.Request, ServiceResponses.Response, ConnectorRequests.Request, ConnectorResponses.Response](
       connector,
       converter
     )
 
-object SubscriptionCreationService {
+object SubscriptionUpdateService {
 
   object Requests {
-
-    final case class Request(id: Id, name: Option[String], contacts: Seq[Contact])
-
-    final case class Id(idType: IdType, value: String)
-
-    sealed trait IdType
-
-    object IdType {
-
-      val all: Set[IdType] = Set(NINO, SAFE, UTR)
-
-      case object NINO extends IdType
-
-      case object UTR extends IdType
-
-      case object SAFE extends IdType
-
-    }
+    final case class Request(id: String, name: Option[String], contacts: Seq[Contact])
   }
 }

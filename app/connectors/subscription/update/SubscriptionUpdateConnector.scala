@@ -14,54 +14,55 @@
  * limitations under the License.
  */
 
-package connectors.subscription.create
+package connectors.subscription.update
 
-import com.google.inject.{Inject, Singleton}
+import com.google.inject.Inject
 import config.FrontendAppConfig
 import connectors.subscription.SubscriptionConnector.Requests.Contact
 import connectors.subscription.SubscriptionConnector.Responses.Response
-import connectors.subscription.create.SubscriptionCreationConnector.Requests.Request
+import connectors.subscription.update.SubscriptionUpdateConnector.Requests.Request
 import connectors.{BaseBackendConnector, BaseConnector}
-import play.api.libs.functional.syntax.{toFunctionalBuilderOps, unlift}
+import play.api.http.Status.NO_CONTENT
+import play.api.libs.functional.syntax.toFunctionalBuilderOps
 import play.api.libs.json.{JsPath, OWrites}
 import play.api.libs.ws.WSClient
 
+import java.net.URL
 import scala.concurrent.{ExecutionContext, Future}
 
-@Singleton
-class SubscriptionCreationConnector @Inject() (frontendAppConfig: FrontendAppConfig, wsClient: WSClient)
+class SubscriptionUpdateConnector @Inject() (frontendAppConfig: FrontendAppConfig, wsClient: WSClient)
     extends BaseBackendConnector[Request, Response](frontendAppConfig, wsClient) {
 
-  override def connectorPath: String = SubscriptionCreationConnector.connectorPath
+  override def connectorPath: String = SubscriptionUpdateConnector.connectorPath
 
   override def call(request: Request)(implicit
     executionContext: ExecutionContext
   ): Future[Either[BaseConnector.Responses.Errors, Response]] =
-    post(baseUrl(), request)
+    post(fullUrl(request), request).map {
+      case Left(error) if error.status == NO_CONTENT => Right(Response("OK"))
+      case other                                     => other
+    }
 
+  private def fullUrl(request: Request) =
+    new URL(s"${baseUrl().toString}/${request.id}")
 }
 
-object SubscriptionCreationConnector {
+object SubscriptionUpdateConnector {
 
   val connectorPath: String = "/subscriptions"
 
   object Requests {
 
-    final case class Request(id: Id, name: Option[String], contacts: Seq[Contact])
+    final case class Request(
+      id: String,
+      name: Option[String],
+      contacts: Seq[Contact]
+    )
 
     object Request {
       implicit lazy val writes: OWrites[Request] =
-        ((JsPath \ "id").write[Id] and
-          (JsPath \ "name").writeNullable[String] and
-          (JsPath \ "contacts").write[Seq[Contact]])(unlift(Request.unapply))
-    }
-
-    final case class Id(idType: String, value: String)
-
-    object Id {
-      implicit lazy val writes: OWrites[Id] =
-        ((JsPath \ "type").write[String] and
-          (JsPath \ "value").write[String])(unlift(Id.unapply))
+        ((JsPath \ "name").writeNullable[String] and
+          (JsPath \ "contacts").write[Seq[Contact]])(r => (r.name, r.contacts))
     }
   }
 }

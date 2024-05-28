@@ -25,7 +25,7 @@ import java.net.URL
 abstract class BaseBackendConnector[REQUEST, RESPONSE](frontendAppConfig: FrontendAppConfig, wsClient: WSClient)
     extends BaseConnector[REQUEST, RESPONSE](wsClient) {
 
-  final override def url(): URL =
+  final override def baseUrl(): URL =
     url"${frontendAppConfig.baseUrlForBackendConnector + connectorPath}"
 
   def connectorPath: String
