@@ -65,7 +65,6 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
                   .withStatus(NO_CONTENT)
               )
           )
-
           val request = SubscriptionUpdateService.Requests.Request(
             id = id,
             name = Some("Harold Winter"),
@@ -86,13 +85,10 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
               )
             )
           )
-
           val response = await(service.call(request))
-
           response shouldBe Right(SubscriptionService.Responses.Response("OK"))
           verifyThatDownstreamApiWasCalled()
         }
-
         "there is only one contact, an individual" in {
           stubFor(
             post(urlEqualTo(s"$connectorPath/$id"))
@@ -118,7 +114,6 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
                   .withStatus(NO_CONTENT)
               )
           )
-
           val request = SubscriptionUpdateService.Requests.Request(
             id = id,
             name = Some("Harold Winter"),
@@ -133,13 +128,10 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
               )
             )
           )
-
           val response = await(service.call(request))
-
           response shouldBe Right(SubscriptionService.Responses.Response("OK"))
           verifyThatDownstreamApiWasCalled()
         }
-
         "there is only one contact, an organisation" in {
           stubFor(
             post(urlEqualTo(s"$connectorPath/$id"))
@@ -163,7 +155,6 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
                   .withStatus(NO_CONTENT)
               )
           )
-
           val request = SubscriptionUpdateService.Requests.Request(
             id = id,
             name = Some("Harold Winter"),
@@ -176,14 +167,11 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
               )
             )
           )
-
           val response = await(service.call(request))
-
           response shouldBe Right(SubscriptionService.Responses.Response("OK"))
           verifyThatDownstreamApiWasCalled()
         }
       }
-
       "fails, where the response body is" - {
         "absent, with a status code of" - {
           "service unavailable" in {
@@ -225,7 +213,6 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
                         |""".stripMargin)
                 )
             )
-
             val request = SubscriptionUpdateService.Requests.Request(
               id = id,
               name = Some("Harold Winter"),
@@ -246,9 +233,7 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
                 )
               )
             )
-
             val response = await(service.call(request))
-
             response shouldBe Left(
               BaseService.Responses.Errors(
                 SERVICE_UNAVAILABLE,
@@ -260,7 +245,6 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
             verifyThatDownstreamApiWasCalled()
           }
         }
-
         "valid, with a status code of" - {
           "internal server error" in {
             stubFor(
@@ -294,7 +278,6 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
                     .withStatus(INTERNAL_SERVER_ERROR)
                 )
             )
-
             val request = SubscriptionUpdateService.Requests.Request(
               id = id,
               name = Some("Harold Winter"),
@@ -315,13 +298,10 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
                 )
               )
             )
-
             val response = await(service.call(request))
-
             response shouldBe Left(BaseService.Responses.Errors(INTERNAL_SERVER_ERROR))
             verifyThatDownstreamApiWasCalled()
           }
-
           "not found" in {
             stubFor(
               post(urlEqualTo(s"$connectorPath/$id"))
@@ -361,7 +341,6 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
                         |""".stripMargin)
                 )
             )
-
             val request = SubscriptionUpdateService.Requests.Request(
               id = id,
               name = Some("Harold Winter"),
@@ -382,9 +361,7 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
                 )
               )
             )
-
             val response = await(service.call(request))
-
             response shouldBe Left(
               BaseService.Responses.Errors(
                 NOT_FOUND,
@@ -396,7 +373,6 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
             verifyThatDownstreamApiWasCalled()
           }
         }
-
         "invalid, specifically:" - {
           "the name is" - {
             "Blank" in {
@@ -438,7 +414,6 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
                           |""".stripMargin)
                   )
               )
-
               val request = SubscriptionUpdateService.Requests.Request(
                 id = id,
                 name = Some(""),
@@ -459,9 +434,7 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
                   )
                 )
               )
-
               val response = await(service.call(request))
-
               response shouldBe Left(
                 BaseService.Responses.Errors(
                   BAD_REQUEST,
@@ -472,7 +445,6 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
               )
               verifyThatDownstreamApiWasCalled()
             }
-
             "too long" in {
               stubFor(
                 post(urlEqualTo(s"$connectorPath/$id"))
@@ -512,7 +484,6 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
                           |""".stripMargin)
                   )
               )
-
               val request = SubscriptionUpdateService.Requests.Request(
                 id = id,
                 name = Some("Harold Winter, III, Earl Of East Mountain & North River, Duke Of South Wales, Phd"),
@@ -533,9 +504,7 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
                   )
                 )
               )
-
               val response = await(service.call(request))
-
               response shouldBe Left(
                 BaseService.Responses.Errors(
                   BAD_REQUEST,
@@ -547,7 +516,6 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
               verifyThatDownstreamApiWasCalled()
             }
           }
-
           "it contains no contacts" in {
             stubFor(
               post(urlEqualTo(s"$connectorPath/$id"))
@@ -571,15 +539,12 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
                         |""".stripMargin)
                 )
             )
-
             val request = SubscriptionUpdateService.Requests.Request(
               id = id,
               name = Some("Harold Winter"),
               contacts = Seq()
             )
-
             val response = await(service.call(request))
-
             response shouldBe Left(
               BaseService.Responses.Errors(
                 BAD_REQUEST,
@@ -590,7 +555,6 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
             )
             verifyThatDownstreamApiWasCalled()
           }
-
           "it contains three contacts" in {
             stubFor(
               post(urlEqualTo(s"$connectorPath/$id"))
@@ -639,7 +603,6 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
                         |""".stripMargin)
                 )
             )
-
             val request = SubscriptionUpdateService.Requests.Request(
               id = id,
               name = Some("Harold Winter"),
@@ -668,9 +631,7 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
                 )
               )
             )
-
             val response = await(service.call(request))
-
             response shouldBe Left(
               BaseService.Responses.Errors(
                 BAD_REQUEST,
@@ -681,7 +642,6 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
             )
             verifyThatDownstreamApiWasCalled()
           }
-
           "it contains two contacts, one has a type which is" - {
             "an individual, where" - {
               "the first name is" - {
@@ -724,7 +684,6 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
                               |""".stripMargin)
                       )
                   )
-
                   val request = SubscriptionUpdateService.Requests.Request(
                     id = id,
                     name = Some("Harold Winter"),
@@ -745,9 +704,7 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
                       )
                     )
                   )
-
                   val response = await(service.call(request))
-
                   response shouldBe Left(
                     BaseService.Responses.Errors(
                       BAD_REQUEST,
@@ -758,7 +715,6 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
                   )
                   verifyThatDownstreamApiWasCalled()
                 }
-
                 "too long" in {
                   stubFor(
                     post(urlEqualTo(s"$connectorPath/$id"))
@@ -798,7 +754,6 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
                               |""".stripMargin)
                       )
                   )
-
                   val request = SubscriptionUpdateService.Requests.Request(
                     id = id,
                     name = Some("Harold Winter"),
@@ -819,9 +774,7 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
                       )
                     )
                   )
-
                   val response = await(service.call(request))
-
                   response shouldBe Left(
                     BaseService.Responses.Errors(
                       BAD_REQUEST,
@@ -833,7 +786,6 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
                   verifyThatDownstreamApiWasCalled()
                 }
               }
-
               "the middle name is" - {
                 "blank" in {
                   stubFor(
@@ -874,7 +826,6 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
                               |""".stripMargin)
                       )
                   )
-
                   val request = SubscriptionUpdateService.Requests.Request(
                     id = id,
                     name = Some("Harold Winter"),
@@ -895,9 +846,7 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
                       )
                     )
                   )
-
                   val response = await(service.call(request))
-
                   response shouldBe Left(
                     BaseService.Responses.Errors(
                       BAD_REQUEST,
@@ -908,7 +857,6 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
                   )
                   verifyThatDownstreamApiWasCalled()
                 }
-
                 "too long" in {
                   stubFor(
                     post(urlEqualTo(s"$connectorPath/$id"))
@@ -948,7 +896,6 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
                               |""".stripMargin)
                       )
                   )
-
                   val request = SubscriptionUpdateService.Requests.Request(
                     id = id,
                     name = Some("Harold Winter"),
@@ -969,9 +916,7 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
                       )
                     )
                   )
-
                   val response = await(service.call(request))
-
                   response shouldBe Left(
                     BaseService.Responses.Errors(
                       BAD_REQUEST,
@@ -983,7 +928,6 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
                   verifyThatDownstreamApiWasCalled()
                 }
               }
-
               "the last name is" - {
                 "blank" in {
                   stubFor(
@@ -1024,7 +968,6 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
                               |""".stripMargin)
                       )
                   )
-
                   val request = SubscriptionUpdateService.Requests.Request(
                     id = id,
                     name = Some("Harold Winter"),
@@ -1045,9 +988,7 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
                       )
                     )
                   )
-
                   val response = await(service.call(request))
-
                   response shouldBe Left(
                     BaseService.Responses.Errors(
                       BAD_REQUEST,
@@ -1058,7 +999,6 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
                   )
                   verifyThatDownstreamApiWasCalled()
                 }
-
                 "too long" in {
                   stubFor(
                     post(urlEqualTo(s"$connectorPath/$id"))
@@ -1098,7 +1038,6 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
                               |""".stripMargin)
                       )
                   )
-
                   val request = SubscriptionUpdateService.Requests.Request(
                     id = id,
                     name = Some("Harold Winter"),
@@ -1119,9 +1058,7 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
                       )
                     )
                   )
-
                   val response = await(service.call(request))
-
                   response shouldBe Left(
                     BaseService.Responses.Errors(
                       BAD_REQUEST,
@@ -1133,7 +1070,6 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
                   verifyThatDownstreamApiWasCalled()
                 }
               }
-
               "the landline is" - {
                 "blank" in {
                   stubFor(
@@ -1174,7 +1110,6 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
                               |""".stripMargin)
                       )
                   )
-
                   val request = SubscriptionUpdateService.Requests.Request(
                     id = id,
                     name = Some("Harold Winter"),
@@ -1195,9 +1130,7 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
                       )
                     )
                   )
-
                   val response = await(service.call(request))
-
                   response shouldBe Left(
                     BaseService.Responses.Errors(
                       BAD_REQUEST,
@@ -1208,7 +1141,6 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
                   )
                   verifyThatDownstreamApiWasCalled()
                 }
-
                 "too long" in {
                   stubFor(
                     post(urlEqualTo(s"$connectorPath/$id"))
@@ -1248,7 +1180,6 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
                               |""".stripMargin)
                       )
                   )
-
                   val request = SubscriptionUpdateService.Requests.Request(
                     id = id,
                     name = Some("Harold Winter"),
@@ -1269,9 +1200,7 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
                       )
                     )
                   )
-
                   val response = await(service.call(request))
-
                   response shouldBe Left(
                     BaseService.Responses.Errors(
                       BAD_REQUEST,
@@ -1282,7 +1211,6 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
                   )
                   verifyThatDownstreamApiWasCalled()
                 }
-
                 "of an invalid format" in {
                   stubFor(
                     post(urlEqualTo(s"$connectorPath/$id"))
@@ -1322,7 +1250,6 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
                               |""".stripMargin)
                       )
                   )
-
                   val request = SubscriptionUpdateService.Requests.Request(
                     id = id,
                     name = Some("Harold Winter"),
@@ -1343,9 +1270,7 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
                       )
                     )
                   )
-
                   val response = await(service.call(request))
-
                   response shouldBe Left(
                     BaseService.Responses.Errors(
                       BAD_REQUEST,
@@ -1357,7 +1282,6 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
                   verifyThatDownstreamApiWasCalled()
                 }
               }
-
               "the mobile is" - {
                 "blank" in {
                   stubFor(
@@ -1398,7 +1322,6 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
                               |""".stripMargin)
                       )
                   )
-
                   val request = SubscriptionUpdateService.Requests.Request(
                     id = id,
                     name = Some("Harold Winter"),
@@ -1419,9 +1342,7 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
                       )
                     )
                   )
-
                   val response = await(service.call(request))
-
                   response shouldBe Left(
                     BaseService.Responses.Errors(
                       BAD_REQUEST,
@@ -1432,7 +1353,6 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
                   )
                   verifyThatDownstreamApiWasCalled()
                 }
-
                 "too long" in {
                   stubFor(
                     post(urlEqualTo(s"$connectorPath/$id"))
@@ -1472,7 +1392,6 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
                               |""".stripMargin)
                       )
                   )
-
                   val request = SubscriptionUpdateService.Requests.Request(
                     id = id,
                     name = Some("Harold Winter"),
@@ -1493,9 +1412,7 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
                       )
                     )
                   )
-
                   val response = await(service.call(request))
-
                   response shouldBe Left(
                     BaseService.Responses.Errors(
                       BAD_REQUEST,
@@ -1506,7 +1423,6 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
                   )
                   verifyThatDownstreamApiWasCalled()
                 }
-
                 "of an invalid format" in {
                   stubFor(
                     post(urlEqualTo(s"$connectorPath/$id"))
@@ -1546,7 +1462,6 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
                               |""".stripMargin)
                       )
                   )
-
                   val request = SubscriptionUpdateService.Requests.Request(
                     id = id,
                     name = Some("Harold Winter"),
@@ -1567,9 +1482,7 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
                       )
                     )
                   )
-
                   val response = await(service.call(request))
-
                   response shouldBe Left(
                     BaseService.Responses.Errors(
                       BAD_REQUEST,
@@ -1581,7 +1494,6 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
                   verifyThatDownstreamApiWasCalled()
                 }
               }
-
               "the email address is" - {
                 "blank" in {
                   stubFor(
@@ -1622,7 +1534,6 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
                               |""".stripMargin)
                       )
                   )
-
                   val request = SubscriptionUpdateService.Requests.Request(
                     id = id,
                     name = Some("Harold Winter"),
@@ -1643,9 +1554,7 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
                       )
                     )
                   )
-
                   val response = await(service.call(request))
-
                   response shouldBe Left(
                     BaseService.Responses.Errors(
                       BAD_REQUEST,
@@ -1656,7 +1565,6 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
                   )
                   verifyThatDownstreamApiWasCalled()
                 }
-
                 "too long" in {
                   stubFor(
                     post(urlEqualTo(s"$connectorPath/$id"))
@@ -1696,7 +1604,6 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
                               |""".stripMargin)
                       )
                   )
-
                   val request = SubscriptionUpdateService.Requests.Request(
                     id = id,
                     name = Some("Harold Winter"),
@@ -1718,9 +1625,7 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
                       )
                     )
                   )
-
                   val response = await(service.call(request))
-
                   response shouldBe Left(
                     BaseService.Responses.Errors(
                       BAD_REQUEST,
@@ -1731,7 +1636,6 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
                   )
                   verifyThatDownstreamApiWasCalled()
                 }
-
                 "of an invalid format" in {
                   stubFor(
                     post(urlEqualTo(s"$connectorPath/$id"))
@@ -1771,7 +1675,6 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
                               |""".stripMargin)
                       )
                   )
-
                   val request = SubscriptionUpdateService.Requests.Request(
                     id = id,
                     name = Some("Harold Winter"),
@@ -1792,9 +1695,7 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
                       )
                     )
                   )
-
                   val response = await(service.call(request))
-
                   response shouldBe Left(
                     BaseService.Responses.Errors(
                       BAD_REQUEST,
@@ -1807,7 +1708,6 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
                 }
               }
             }
-
             "an organisation, where" - {
               "the name is" - {
                 "blank" in {
@@ -1849,7 +1749,6 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
                               |""".stripMargin)
                       )
                   )
-
                   val request = SubscriptionUpdateService.Requests.Request(
                     id = id,
                     name = Some("Harold Winter"),
@@ -1870,9 +1769,7 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
                       )
                     )
                   )
-
                   val response = await(service.call(request))
-
                   response shouldBe Left(
                     BaseService.Responses.Errors(
                       BAD_REQUEST,
@@ -1883,7 +1780,6 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
                   )
                   verifyThatDownstreamApiWasCalled()
                 }
-
                 "too long" in {
                   stubFor(
                     post(urlEqualTo(s"$connectorPath/$id"))
@@ -1923,7 +1819,6 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
                               |""".stripMargin)
                       )
                   )
-
                   val request = SubscriptionUpdateService.Requests.Request(
                     id = id,
                     name = Some("Harold Winter"),
@@ -1945,9 +1840,7 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
                       )
                     )
                   )
-
                   val response = await(service.call(request))
-
                   response shouldBe Left(
                     BaseService.Responses.Errors(
                       BAD_REQUEST,
@@ -1959,7 +1852,6 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
                   verifyThatDownstreamApiWasCalled()
                 }
               }
-
               "the landline is" - {
                 "blank" in {
                   stubFor(
@@ -2000,7 +1892,6 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
                               |""".stripMargin)
                       )
                   )
-
                   val request = SubscriptionUpdateService.Requests.Request(
                     id = id,
                     name = Some("Harold Winter"),
@@ -2021,9 +1912,7 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
                       )
                     )
                   )
-
                   val response = await(service.call(request))
-
                   response shouldBe Left(
                     BaseService.Responses.Errors(
                       BAD_REQUEST,
@@ -2034,7 +1923,6 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
                   )
                   verifyThatDownstreamApiWasCalled()
                 }
-
                 "too long" in {
                   stubFor(
                     post(urlEqualTo(s"$connectorPath/$id"))
@@ -2074,7 +1962,6 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
                               |""".stripMargin)
                       )
                   )
-
                   val request = SubscriptionUpdateService.Requests.Request(
                     id = id,
                     name = Some("Harold Winter"),
@@ -2095,9 +1982,7 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
                       )
                     )
                   )
-
                   val response = await(service.call(request))
-
                   response shouldBe Left(
                     BaseService.Responses.Errors(
                       BAD_REQUEST,
@@ -2108,7 +1993,6 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
                   )
                   verifyThatDownstreamApiWasCalled()
                 }
-
                 "of an invalid format" in {
                   stubFor(
                     post(urlEqualTo(s"$connectorPath/$id"))
@@ -2148,7 +2032,6 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
                               |""".stripMargin)
                       )
                   )
-
                   val request = SubscriptionUpdateService.Requests.Request(
                     id = id,
                     name = Some("Harold Winter"),
@@ -2169,9 +2052,7 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
                       )
                     )
                   )
-
                   val response = await(service.call(request))
-
                   response shouldBe Left(
                     BaseService.Responses.Errors(
                       BAD_REQUEST,
@@ -2183,7 +2064,6 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
                   verifyThatDownstreamApiWasCalled()
                 }
               }
-
               "the mobile is" - {
                 "blank" in {
                   stubFor(
@@ -2224,7 +2104,6 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
                               |""".stripMargin)
                       )
                   )
-
                   val request = SubscriptionUpdateService.Requests.Request(
                     id = id,
                     name = Some("Harold Winter"),
@@ -2245,9 +2124,7 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
                       )
                     )
                   )
-
                   val response = await(service.call(request))
-
                   response shouldBe Left(
                     BaseService.Responses.Errors(
                       BAD_REQUEST,
@@ -2258,7 +2135,6 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
                   )
                   verifyThatDownstreamApiWasCalled()
                 }
-
                 "too long" in {
                   stubFor(
                     post(urlEqualTo(s"$connectorPath/$id"))
@@ -2298,7 +2174,6 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
                               |""".stripMargin)
                       )
                   )
-
                   val request = SubscriptionUpdateService.Requests.Request(
                     id = id,
                     name = Some("Harold Winter"),
@@ -2319,9 +2194,7 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
                       )
                     )
                   )
-
                   val response = await(service.call(request))
-
                   response shouldBe Left(
                     BaseService.Responses.Errors(
                       BAD_REQUEST,
@@ -2332,7 +2205,6 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
                   )
                   verifyThatDownstreamApiWasCalled()
                 }
-
                 "of an invalid format" in {
                   stubFor(
                     post(urlEqualTo(s"$connectorPath/$id"))
@@ -2372,7 +2244,6 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
                               |""".stripMargin)
                       )
                   )
-
                   val request = SubscriptionUpdateService.Requests.Request(
                     id = id,
                     name = Some("Harold Winter"),
@@ -2393,9 +2264,7 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
                       )
                     )
                   )
-
                   val response = await(service.call(request))
-
                   response shouldBe Left(
                     BaseService.Responses.Errors(
                       BAD_REQUEST,
@@ -2407,7 +2276,6 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
                   verifyThatDownstreamApiWasCalled()
                 }
               }
-
               "the email address is" - {
                 "blank" in {
                   stubFor(
@@ -2448,7 +2316,6 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
                               |""".stripMargin)
                       )
                   )
-
                   val request = SubscriptionUpdateService.Requests.Request(
                     id = id,
                     name = Some("Harold Winter"),
@@ -2469,9 +2336,7 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
                       )
                     )
                   )
-
                   val response = await(service.call(request))
-
                   response shouldBe Left(
                     BaseService.Responses.Errors(
                       BAD_REQUEST,
@@ -2482,7 +2347,6 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
                   )
                   verifyThatDownstreamApiWasCalled()
                 }
-
                 "too long" in {
                   stubFor(
                     post(urlEqualTo(s"$connectorPath/$id"))
@@ -2522,7 +2386,6 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
                               |""".stripMargin)
                       )
                   )
-
                   val request = SubscriptionUpdateService.Requests.Request(
                     id = id,
                     name = Some("Harold Winter"),
@@ -2544,9 +2407,7 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
                       )
                     )
                   )
-
                   val response = await(service.call(request))
-
                   response shouldBe Left(
                     BaseService.Responses.Errors(
                       BAD_REQUEST,
@@ -2557,7 +2418,6 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
                   )
                   verifyThatDownstreamApiWasCalled()
                 }
-
                 "of an invalid format" in {
                   stubFor(
                     post(urlEqualTo(s"$connectorPath/$id"))
@@ -2597,7 +2457,6 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
                               |""".stripMargin)
                       )
                   )
-
                   val request = SubscriptionUpdateService.Requests.Request(
                     id = id,
                     name = Some("Harold Winter"),
@@ -2618,9 +2477,7 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
                       )
                     )
                   )
-
                   val response = await(service.call(request))
-
                   response shouldBe Left(
                     BaseService.Responses.Errors(
                       BAD_REQUEST,

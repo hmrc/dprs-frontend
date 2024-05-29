@@ -16,27 +16,13 @@
 
 package converters.subscription.update
 
-import connectors.subscription.SubscriptionConnector.{Requests => ConnectorDataRequests, Responses => ConnectorResponses}
 import connectors.subscription.update.SubscriptionUpdateConnector.{Requests => ConnectorUpdateRequests}
-import converters.BaseConverter
-import services.subscription.SubscriptionService.{Requests => ServiceDataRequests, Responses => ServiceResponses}
+import converters.subscription.SubscriptionConverter
 import services.subscription.update.SubscriptionUpdateService.{Requests => ServiceCreateRequests}
 
-class SubscriptionUpdateConverter
-    extends BaseConverter[ServiceCreateRequests.Request, ConnectorUpdateRequests.Request, ConnectorResponses.Response, ServiceResponses.Response] {
+class SubscriptionUpdateConverter extends SubscriptionConverter[ServiceCreateRequests.Request, ConnectorUpdateRequests.Request] {
 
   override def convertServiceRequest(request: ServiceCreateRequests.Request): ConnectorUpdateRequests.Request =
     ConnectorUpdateRequests.Request(id = request.id, name = request.name, contacts = request.contacts.map(convert))
-
-  override def convertSuccessfulConnectorResponse(response: ConnectorResponses.Response): ServiceResponses.Response =
-    ServiceResponses.Response("OK")
-
-  private def convert(contact: ServiceDataRequests.Contact): ConnectorDataRequests.Contact =
-    contact match {
-      case ServiceDataRequests.Individual(firstName, middleName, lastName, landline, mobile, emailAddress) =>
-        ConnectorDataRequests.Individual("I", firstName, middleName, lastName, landline, mobile, emailAddress)
-      case ServiceDataRequests.Organisation(name, landline, mobile, emailAddress) =>
-        ConnectorDataRequests.Organisation("O", name, landline, mobile, emailAddress)
-    }
 
 }

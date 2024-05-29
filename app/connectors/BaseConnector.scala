@@ -16,9 +16,9 @@
 
 package connectors
 
-import connectors.BaseConnector.Exceptions.ResponseParsingException
+import connectors.BaseConnector.Exceptions.{ResponseExpectedException, ResponseParsingException}
 import connectors.BaseConnector.Responses.Errors
-import play.api.http.Status.OK
+import play.api.http.Status.{NO_CONTENT, OK}
 import play.api.libs.json.Json.toJson
 import play.api.libs.json.{JsPath, Reads, Writes}
 import play.api.libs.ws.{WSClient, WSResponse}
@@ -37,28 +37,42 @@ abstract class BaseConnector[REQUEST, RESPONSE](wsClient: WSClient) {
     executionContext: ExecutionContext,
     writes: Writes[REQUEST],
     reads: Reads[RESPONSE]
-  ): Future[Either[Errors, RESPONSE]] =
+  ): Future[Either[Errors, Option[RESPONSE]]] =
     wsClient
       .url(url.toString)
       .post(toJson(request))
       .transform {
         case Success(wsResponse) =>
           wsResponse.status match {
-            case OK              => asResponse(wsResponse)
+            case OK | NO_CONTENT => asResponse(wsResponse)
             case otherStatusCode => asErrors(otherStatusCode, wsResponse)
           }
         case Failure(exception) => Failure(exception)
       }
 
+  def post(request: REQUEST)(implicit
+    executionContext: ExecutionContext,
+    writes: Writes[REQUEST],
+    reads: Reads[RESPONSE]
+  ): Future[Either[Errors, RESPONSE]] =
+    post(baseUrl(), request).map {
+      case Left(error)     => Left(error)
+      case Right(response) => Right(response.getOrElse(throw new ResponseExpectedException()))
+    }
+
   def baseUrl(): URL
 
-  private def asResponse(wsResponse: WSResponse)(implicit reads: Reads[RESPONSE]): Try[Either[Errors, RESPONSE]] =
-    wsResponse.json
-      .validate[RESPONSE]
-      .map(response => Success(Right(response)))
-      .getOrElse(Failure(new ResponseParsingException()))
+  private def asResponse(wsResponse: WSResponse)(implicit reads: Reads[RESPONSE]): Try[Either[Errors, Option[RESPONSE]]] =
+    wsResponse.status match {
+      case NO_CONTENT => Success(Right(None))
+      case _ =>
+        wsResponse.json
+          .validate[RESPONSE]
+          .map(response => Success(Right(Some(response))))
+          .getOrElse(Failure(new ResponseParsingException()))
+    }
 
-  private def asErrors(statusCode: Int, wsResponse: WSResponse): Try[Either[Errors, RESPONSE]] =
+  private def asErrors(statusCode: Int, wsResponse: WSResponse): Try[Either[Errors, Option[RESPONSE]]] =
     if (wsResponse.body.nonEmpty)
       wsResponse.json
         .validate[Seq[BaseConnector.Responses.Error]]
@@ -71,6 +85,8 @@ object BaseConnector {
 
   object Exceptions {
     final class ResponseParsingException extends RuntimeException
+    final class ResponseExpectedException extends RuntimeException
+    final class ResponseUnexpectedException extends RuntimeException
   }
 
   object Responses {

@@ -22,7 +22,7 @@ import connectors.subscription.SubscriptionConnector.Requests.Contact
 import connectors.subscription.SubscriptionConnector.Responses.Response
 import connectors.subscription.update.SubscriptionUpdateConnector.Requests.Request
 import connectors.{BaseBackendConnector, BaseConnector}
-import play.api.http.Status.NO_CONTENT
+import connectors.BaseConnector.Exceptions.ResponseUnexpectedException
 import play.api.libs.functional.syntax.toFunctionalBuilderOps
 import play.api.libs.json.{JsPath, OWrites}
 import play.api.libs.ws.WSClient
@@ -39,8 +39,9 @@ class SubscriptionUpdateConnector @Inject() (frontendAppConfig: FrontendAppConfi
     executionContext: ExecutionContext
   ): Future[Either[BaseConnector.Responses.Errors, Response]] =
     post(fullUrl(request), request).map {
-      case Left(error) if error.status == NO_CONTENT => Right(Response("OK"))
-      case other                                     => other
+      case Left(error) => Left(error)
+      case Right(None) => Right(Response(request.id))
+      case Right(_)    => throw new ResponseUnexpectedException()
     }
 
   private def fullUrl(request: Request) =

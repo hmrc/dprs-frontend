@@ -16,14 +16,13 @@
 
 package converters.subscription.create
 
-import connectors.subscription.SubscriptionConnector.{Requests => ConnectorDataRequests, Responses => ConnectorResponses}
+import connectors.subscription.SubscriptionConnector.{Responses => ConnectorResponses}
 import connectors.subscription.create.SubscriptionCreationConnector.{Requests => ConnectorCreateRequests}
-import converters.BaseConverter
-import services.subscription.SubscriptionService.{Requests => ServiceDataRequests, Responses => ServiceResponses}
+import converters.subscription.SubscriptionConverter
+import services.subscription.SubscriptionService.{Responses => ServiceResponses}
 import services.subscription.create.SubscriptionCreationService.{Requests => ServiceCreateRequests}
 
-class SubscriptionCreationConverter
-    extends BaseConverter[ServiceCreateRequests.Request, ConnectorCreateRequests.Request, ConnectorResponses.Response, ServiceResponses.Response] {
+class SubscriptionCreationConverter extends SubscriptionConverter[ServiceCreateRequests.Request, ConnectorCreateRequests.Request] {
 
   override def convertServiceRequest(request: ServiceCreateRequests.Request): ConnectorCreateRequests.Request =
     ConnectorCreateRequests.Request(id = convert(request.id), name = request.name, contacts = request.contacts.map(convert))
@@ -39,13 +38,4 @@ class SubscriptionCreationConverter
     case ServiceCreateRequests.IdType.SAFE => "SAFE"
     case ServiceCreateRequests.IdType.UTR  => "UTR"
   }
-
-  private def convert(contact: ServiceDataRequests.Contact): ConnectorDataRequests.Contact =
-    contact match {
-      case ServiceDataRequests.Individual(firstName, middleName, lastName, landline, mobile, emailAddress) =>
-        ConnectorDataRequests.Individual("I", firstName, middleName, lastName, landline, mobile, emailAddress)
-      case ServiceDataRequests.Organisation(name, landline, mobile, emailAddress) =>
-        ConnectorDataRequests.Organisation("O", name, landline, mobile, emailAddress)
-    }
-
 }

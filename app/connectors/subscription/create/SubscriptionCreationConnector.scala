@@ -37,7 +37,7 @@ class SubscriptionCreationConnector @Inject() (frontendAppConfig: FrontendAppCon
   override def call(request: Request)(implicit
     executionContext: ExecutionContext
   ): Future[Either[BaseConnector.Responses.Errors, Response]] =
-    post(baseUrl(), request)
+    post(request)
 
 }
 
