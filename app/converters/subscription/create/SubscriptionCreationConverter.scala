@@ -16,18 +16,18 @@
 
 package converters.subscription.create
 
-import connectors.subscription.SubscriptionConnector.{Responses => ConnectorResponses}
+import connectors.subscription.create.SubscriptionCreationConnector.Responses.Response
 import connectors.subscription.create.SubscriptionCreationConnector.{Requests => ConnectorCreateRequests}
 import converters.subscription.SubscriptionConverter
 import services.subscription.SubscriptionService.{Responses => ServiceResponses}
 import services.subscription.create.SubscriptionCreationService.{Requests => ServiceCreateRequests}
 
-class SubscriptionCreationConverter extends SubscriptionConverter[ServiceCreateRequests.Request, ConnectorCreateRequests.Request] {
+class SubscriptionCreationConverter extends SubscriptionConverter[ServiceCreateRequests.Request, ConnectorCreateRequests.Request, Response] {
 
   override def convertServiceRequest(request: ServiceCreateRequests.Request): ConnectorCreateRequests.Request =
     ConnectorCreateRequests.Request(id = convert(request.id), name = request.name, contacts = request.contacts.map(convert))
 
-  override def convertSuccessfulConnectorResponse(response: ConnectorResponses.Response): ServiceResponses.Response =
+  override def convertSuccessfulConnectorResponse(response: Response): ServiceResponses.Response =
     ServiceResponses.Response(response.id)
 
   private def convert(id: ServiceCreateRequests.Id): ConnectorCreateRequests.Id =

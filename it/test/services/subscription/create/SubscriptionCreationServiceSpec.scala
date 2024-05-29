@@ -16,12 +16,12 @@
 
 package services.subscription.create
 
-import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, equalToJson, post, stubFor, urlEqualTo}
+import com.github.tomakehurst.wiremock.client.WireMock._
 import connectors.BaseConnector
 import connectors.subscription.create.SubscriptionCreationConnector
-import play.api.http.Status.{BAD_REQUEST, CONFLICT, INTERNAL_SERVER_ERROR, OK, SERVICE_UNAVAILABLE}
+import play.api.http.Status._
 import services.BaseService.Responses.Error
-import services.subscription.{create, SubscriptionService}
+import services.subscription.SubscriptionService
 import services.{BaseBackendConnectorSpec, BaseService}
 
 class SubscriptionCreationServiceSpec extends BaseBackendConnectorSpec {

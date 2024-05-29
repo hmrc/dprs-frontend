@@ -18,8 +18,7 @@ package services.subscription.create
 
 import com.google.inject.{Inject, Singleton}
 import connectors.subscription.create.SubscriptionCreationConnector
-import connectors.subscription.create.SubscriptionCreationConnector.{Requests => ConnectorRequests}
-import connectors.subscription.SubscriptionConnector.{Responses => ConnectorResponses}
+import connectors.subscription.create.SubscriptionCreationConnector.{Requests => ConnectorRequests, Responses => ConnectorResponses}
 import converters.subscription.create.SubscriptionCreationConverter
 import services.BaseService
 import services.subscription.SubscriptionService.Requests.Contact

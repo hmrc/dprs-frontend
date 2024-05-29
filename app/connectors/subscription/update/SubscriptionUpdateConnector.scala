@@ -18,13 +18,13 @@ package connectors.subscription.update
 
 import com.google.inject.Inject
 import config.FrontendAppConfig
-import connectors.subscription.SubscriptionConnector.Requests.Contact
-import connectors.subscription.SubscriptionConnector.Responses.Response
-import connectors.subscription.update.SubscriptionUpdateConnector.Requests.Request
-import connectors.{BaseBackendConnector, BaseConnector}
 import connectors.BaseConnector.Exceptions.ResponseUnexpectedException
+import connectors.subscription.SubscriptionConnector.Requests.Contact
+import connectors.subscription.update.SubscriptionUpdateConnector.Requests.Request
+import connectors.subscription.update.SubscriptionUpdateConnector.Responses.Response
+import connectors.{BaseBackendConnector, BaseConnector}
 import play.api.libs.functional.syntax.toFunctionalBuilderOps
-import play.api.libs.json.{JsPath, OWrites}
+import play.api.libs.json.{JsPath, OWrites, Reads}
 import play.api.libs.ws.WSClient
 
 import java.net.URL
@@ -40,7 +40,7 @@ class SubscriptionUpdateConnector @Inject() (frontendAppConfig: FrontendAppConfi
   ): Future[Either[BaseConnector.Responses.Errors, Response]] =
     post(fullUrl(request), request).map {
       case Left(error) => Left(error)
-      case Right(None) => Right(Response(request.id))
+      case Right(None) => Right(Response())
       case Right(_)    => throw new ResponseUnexpectedException()
     }
 
@@ -65,5 +65,17 @@ object SubscriptionUpdateConnector {
         ((JsPath \ "name").writeNullable[String] and
           (JsPath \ "contacts").write[Seq[Contact]])(r => (r.name, r.contacts))
     }
+  }
+
+  object Responses {
+
+    final case class Response()
+
+    object Response {
+      implicit lazy val reads: Reads[Response] =
+        JsPath.read[String].map(_ => Response())
+
+    }
+
   }
 }

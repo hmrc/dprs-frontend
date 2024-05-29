@@ -19,11 +19,11 @@ package connectors.subscription.create
 import com.google.inject.{Inject, Singleton}
 import config.FrontendAppConfig
 import connectors.subscription.SubscriptionConnector.Requests.Contact
-import connectors.subscription.SubscriptionConnector.Responses.Response
 import connectors.subscription.create.SubscriptionCreationConnector.Requests.Request
+import connectors.subscription.create.SubscriptionCreationConnector.Responses.Response
 import connectors.{BaseBackendConnector, BaseConnector}
 import play.api.libs.functional.syntax.{toFunctionalBuilderOps, unlift}
-import play.api.libs.json.{JsPath, OWrites}
+import play.api.libs.json.{JsPath, OWrites, Reads}
 import play.api.libs.ws.WSClient
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -62,6 +62,17 @@ object SubscriptionCreationConnector {
       implicit lazy val writes: OWrites[Id] =
         ((JsPath \ "type").write[String] and
           (JsPath \ "value").write[String])(unlift(Id.unapply))
+    }
+  }
+
+  object Responses {
+
+    final case class Response(id: String)
+
+    object Response {
+      implicit lazy val reads: Reads[Response] =
+        (JsPath \ "id").read[String].map(Response(_))
+
     }
   }
 }

@@ -16,7 +16,7 @@
 
 package services
 
-import com.github.tomakehurst.wiremock.client.WireMock.getAllServeEvents
+import com.github.tomakehurst.wiremock.client.WireMock.{getAllServeEvents, resetAllRequests}
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers
@@ -50,6 +50,7 @@ abstract class BaseConnectorSpec extends AnyFreeSpec with Matchers with ScalaFut
   def verifyThatDownstreamApiWasCalled(): Unit =
     withClue("We expected a single downstream API (stub) to be called, but it wasn't.") {
       getAllServeEvents.asScala.count(_.getWasMatched) shouldBe 1
+      resetAllRequests()
     }
 
   private def baseApplicationBuilder(): GuiceApplicationBuilder =

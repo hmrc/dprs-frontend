@@ -1,1 +1,1 @@
-sbt "clean;scalafmtAll;test:scalafmtAll;it/scalafmtAll;coverage;test;it/test;coverageReport"
+sbt "clean;scalafmtCheck;test:scalafmtCheck;it/scalafmtCheck;coverage;test;it/test;coverageReport"

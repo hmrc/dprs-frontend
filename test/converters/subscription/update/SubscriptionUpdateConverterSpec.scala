@@ -28,10 +28,8 @@ class SubscriptionUpdateConverterSpec extends BaseSpec {
 
   "when updating a subscription, the converter returns the expected value, for a" - {
     "service request" in {
-      val id = "a7405c8d-06ee-46a3-b5a0-5d65176360ed"
-
       val serviceRequest = SubscriptionUpdateService.Requests.Request(
-        id = id,
+        id = "a7405c8d-06ee-46a3-b5a0-5d65176360ed",
         name = Some("Harold Winter"),
         contacts = Seq(
           SubscriptionService.Requests.Individual(
@@ -54,7 +52,7 @@ class SubscriptionUpdateConverterSpec extends BaseSpec {
       val connectorRequest = converter.convertServiceRequest(serviceRequest)
 
       connectorRequest shouldBe SubscriptionUpdateConnector.Requests.Request(
-        id = id,
+        id = "a7405c8d-06ee-46a3-b5a0-5d65176360ed",
         name = Some("Harold Winter"),
         contacts = Seq(
           SubscriptionConnector.Requests.Individual(
@@ -79,7 +77,7 @@ class SubscriptionUpdateConverterSpec extends BaseSpec {
   }
 
   "connector response" in {
-    val connectorResponse = SubscriptionConnector.Responses.Response("")
+    val connectorResponse = SubscriptionUpdateConnector.Responses.Response()
 
     val serviceResponse = converter.convertSuccessfulConnectorResponse(connectorResponse)
 

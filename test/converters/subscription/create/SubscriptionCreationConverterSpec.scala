@@ -84,7 +84,7 @@ class SubscriptionCreationConverterSpec extends BaseSpec {
       }
     }
     "connector response" in {
-      val connectorResponse = SubscriptionConnector.Responses.Response("1cb6d341-4f17-446e-a549-b3e85f8f05f4")
+      val connectorResponse = SubscriptionCreationConnector.Responses.Response("1cb6d341-4f17-446e-a549-b3e85f8f05f4")
 
       val serviceResponse = converter.convertSuccessfulConnectorResponse(connectorResponse)
 

@@ -17,7 +17,7 @@
 package connectors.subscription
 
 import play.api.libs.functional.syntax.{toFunctionalBuilderOps, unlift}
-import play.api.libs.json.{JsPath, Json, OWrites, Reads}
+import play.api.libs.json.{JsPath, Json, OWrites}
 
 object SubscriptionConnector {
   object Requests {
@@ -69,17 +69,6 @@ object SubscriptionConnector {
           (JsPath \ "landline").writeNullable[String] and
           (JsPath \ "mobile").writeNullable[String] and
           (JsPath \ "emailAddress").write[String])(unlift(Organisation.unapply))
-    }
-  }
-
-  object Responses {
-
-    final case class Response(id: String)
-
-    object Response {
-      implicit lazy val reads: Reads[Response] =
-        (JsPath \ "id").read[String].map(Response(_))
-
     }
   }
 }
