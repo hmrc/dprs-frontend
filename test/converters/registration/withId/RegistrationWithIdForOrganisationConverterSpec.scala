@@ -19,9 +19,9 @@ package converters.registration.withId
 import base.BaseSpec
 import connectors.registration.RegistrationConnector
 import connectors.registration.withId.{RegistrationWithIdConnector, RegistrationWithIdForOrganisationConnector}
-import services.registration.withId.RegistrationWithIdForOrganisationService
 import services.registration.BaseRegistrationService.{Responses => CommonRegistrationResponses}
 import services.registration.withId.BaseRegistrationWithIdService.{Responses => CommonRegistrationWithIdResponses}
+import services.registration.withId.RegistrationWithIdForOrganisationService
 
 class RegistrationWithIdForOrganisationConverterSpec extends BaseSpec {
 
@@ -124,28 +124,30 @@ class RegistrationWithIdForOrganisationConverterSpec extends BaseSpec {
             )
           )
 
-          val serviceResponse = converter.convertSuccessfulConnectorResponse(connectorResponse)
+          val serviceResponse = converter.convertSuccessfulConnectorResponse(Some(connectorResponse))
 
-          serviceResponse shouldBe RegistrationWithIdForOrganisationService.Responses.Response(
-            ids = Seq(
-              CommonRegistrationResponses.Id(CommonRegistrationResponses.IdType.ARN, "WARN1442450"),
-              CommonRegistrationResponses.Id(CommonRegistrationResponses.IdType.SAFE, "XE0000586571722"),
-              CommonRegistrationResponses.Id(CommonRegistrationResponses.IdType.SAP, "8231791429"),
-              CommonRegistrationResponses.Id(CommonRegistrationResponses.IdType.UNKNOWN, "7c9c26fa-2471-4e23-9a4c-1fe7da7b9582")
-            ),
-            name = "Dyson",
-            _type = expectedType,
-            address = CommonRegistrationWithIdResponses.Address(lineOne = "2627 Gus Hill",
-                                                                lineTwo = Some("Apt. 898"),
-                                                                lineThree = None,
-                                                                lineFour = Some("West Corrinamouth"),
-                                                                postalCode = "OX2 3HD",
-                                                                countryCode = "AD"
-            ),
-            contactDetails = CommonRegistrationWithIdResponses.ContactDetails(landline = Some("176905117"),
-                                                                              mobile = Some("62281724761"),
-                                                                              fax = Some("08959633679"),
-                                                                              emailAddress = Some("edward.goodenough@example.com")
+          serviceResponse shouldBe Some(
+            RegistrationWithIdForOrganisationService.Responses.Response(
+              ids = Seq(
+                CommonRegistrationResponses.Id(CommonRegistrationResponses.IdType.ARN, "WARN1442450"),
+                CommonRegistrationResponses.Id(CommonRegistrationResponses.IdType.SAFE, "XE0000586571722"),
+                CommonRegistrationResponses.Id(CommonRegistrationResponses.IdType.SAP, "8231791429"),
+                CommonRegistrationResponses.Id(CommonRegistrationResponses.IdType.UNKNOWN, "7c9c26fa-2471-4e23-9a4c-1fe7da7b9582")
+              ),
+              name = "Dyson",
+              _type = expectedType,
+              address = CommonRegistrationWithIdResponses.Address(lineOne = "2627 Gus Hill",
+                                                                  lineTwo = Some("Apt. 898"),
+                                                                  lineThree = None,
+                                                                  lineFour = Some("West Corrinamouth"),
+                                                                  postalCode = "OX2 3HD",
+                                                                  countryCode = "AD"
+              ),
+              contactDetails = CommonRegistrationWithIdResponses.ContactDetails(landline = Some("176905117"),
+                                                                                mobile = Some("62281724761"),
+                                                                                fax = Some("08959633679"),
+                                                                                emailAddress = Some("edward.goodenough@example.com")
+              )
             )
           )
 

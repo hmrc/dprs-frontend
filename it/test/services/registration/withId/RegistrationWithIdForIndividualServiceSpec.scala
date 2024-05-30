@@ -106,27 +106,29 @@ class RegistrationWithIdForIndividualServiceSpec extends BaseBackendConnectorSpe
         val response = await(service.call(request))
 
         response shouldBe Right(
-          RegistrationWithIdForIndividualService.Responses.Response(
-            ids = Seq(
-              CommonRegistrationResponses.Id(CommonRegistrationResponses.IdType.ARN, "WARN3849921"),
-              CommonRegistrationResponses.Id(CommonRegistrationResponses.IdType.SAFE, "XE0000200775706"),
-              CommonRegistrationResponses.Id(CommonRegistrationResponses.IdType.SAP, "1960629967")
-            ),
-            firstName = "Patrick",
-            middleName = Some("John"),
-            lastName = "Dyson",
-            dateOfBirth = Some("1970-10-04"),
-            address = CommonRegistrationWithIdResponses.Address(lineOne = "26424 Cecelia Junction",
-                                                                lineTwo = Some("Suite 858"),
-                                                                lineThree = Some(""),
-                                                                lineFour = Some("West Siobhanberg"),
-                                                                postalCode = "OX2 3HD",
-                                                                countryCode = "AD"
-            ),
-            contactDetails = CommonRegistrationWithIdResponses.ContactDetails(landline = Some("747663966"),
-                                                                              mobile = Some("38390756243"),
-                                                                              fax = Some("58371813020"),
-                                                                              emailAddress = Some("Patrick.Dyson@example.com")
+          Some(
+            RegistrationWithIdForIndividualService.Responses.Response(
+              ids = Seq(
+                CommonRegistrationResponses.Id(CommonRegistrationResponses.IdType.ARN, "WARN3849921"),
+                CommonRegistrationResponses.Id(CommonRegistrationResponses.IdType.SAFE, "XE0000200775706"),
+                CommonRegistrationResponses.Id(CommonRegistrationResponses.IdType.SAP, "1960629967")
+              ),
+              firstName = "Patrick",
+              middleName = Some("John"),
+              lastName = "Dyson",
+              dateOfBirth = Some("1970-10-04"),
+              address = CommonRegistrationWithIdResponses.Address(lineOne = "26424 Cecelia Junction",
+                                                                  lineTwo = Some("Suite 858"),
+                                                                  lineThree = Some(""),
+                                                                  lineFour = Some("West Siobhanberg"),
+                                                                  postalCode = "OX2 3HD",
+                                                                  countryCode = "AD"
+              ),
+              contactDetails = CommonRegistrationWithIdResponses.ContactDetails(landline = Some("747663966"),
+                                                                                mobile = Some("38390756243"),
+                                                                                fax = Some("58371813020"),
+                                                                                emailAddress = Some("Patrick.Dyson@example.com")
+              )
             )
           )
         )

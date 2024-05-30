@@ -41,10 +41,7 @@ object SubscriptionService {
       mobile: Option[String],
       emailAddress: String
     ) extends Contact
+
   }
 
-  object Responses {
-
-    final case class Response(id: String)
-  }
 }

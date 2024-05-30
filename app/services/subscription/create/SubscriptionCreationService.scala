@@ -22,8 +22,7 @@ import connectors.subscription.create.SubscriptionCreationConnector.{Requests =>
 import converters.subscription.create.SubscriptionCreationConverter
 import services.BaseService
 import services.subscription.SubscriptionService.Requests.Contact
-import services.subscription.create.SubscriptionCreationService.{Requests => ServiceRequests}
-import services.subscription.SubscriptionService.{Responses => ServiceResponses}
+import services.subscription.create.SubscriptionCreationService.{Requests => ServiceRequests, Responses => ServiceResponses}
 
 @Singleton
 class SubscriptionCreationService @Inject() (connector: SubscriptionCreationConnector, converter: SubscriptionCreationConverter)
@@ -53,5 +52,9 @@ object SubscriptionCreationService {
       case object SAFE extends IdType
 
     }
+  }
+
+  object Responses {
+    final case class Response(id: String)
   }
 }

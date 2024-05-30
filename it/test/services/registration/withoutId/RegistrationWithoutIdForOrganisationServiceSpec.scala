@@ -98,11 +98,13 @@ class RegistrationWithoutIdForOrganisationServiceSpec extends BaseBackendConnect
         val response = await(service.call(request))
 
         response shouldBe Right(
-          CommonRegistrationResponses.Response(ids =
-            Seq(
-              CommonRegistrationResponses.Id(CommonRegistrationResponses.IdType.ARN, "WARN3849921"),
-              CommonRegistrationResponses.Id(CommonRegistrationResponses.IdType.SAFE, "XE0000200775706"),
-              CommonRegistrationResponses.Id(CommonRegistrationResponses.IdType.SAP, "1960629967")
+          Some(
+            CommonRegistrationResponses.Response(ids =
+              Seq(
+                CommonRegistrationResponses.Id(CommonRegistrationResponses.IdType.ARN, "WARN3849921"),
+                CommonRegistrationResponses.Id(CommonRegistrationResponses.IdType.SAFE, "XE0000200775706"),
+                CommonRegistrationResponses.Id(CommonRegistrationResponses.IdType.SAP, "1960629967")
+              )
             )
           )
         )

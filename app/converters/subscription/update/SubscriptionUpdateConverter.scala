@@ -16,12 +16,21 @@
 
 package converters.subscription.update
 
-import connectors.subscription.update.SubscriptionUpdateConnector.Responses.Response
+import connectors.BaseConnector
 import connectors.subscription.update.SubscriptionUpdateConnector.{Requests => ConnectorUpdateRequests}
 import converters.subscription.SubscriptionConverter
+import services.BaseService
 import services.subscription.update.SubscriptionUpdateService.{Requests => ServiceCreateRequests}
 
-class SubscriptionUpdateConverter extends SubscriptionConverter[ServiceCreateRequests.Request, ConnectorUpdateRequests.Request, Response] {
+class SubscriptionUpdateConverter
+    extends SubscriptionConverter[
+      ServiceCreateRequests.Request,
+      ConnectorUpdateRequests.Request,
+      BaseConnector.Responses.EmptyResponse,
+      BaseService.Responses.EmptyResponse
+    ] {
+
+  override def convertSuccessfulConnectorResponse(response: Option[BaseConnector.Responses.EmptyResponse]): Option[BaseService.Responses.EmptyResponse] = None
 
   override def convertServiceRequest(request: ServiceCreateRequests.Request): ConnectorUpdateRequests.Request =
     ConnectorUpdateRequests.Request(id = request.id, name = request.name, contacts = request.contacts.map(convert))

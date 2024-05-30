@@ -20,7 +20,7 @@ import base.BaseSpec
 import connectors.subscription.SubscriptionConnector
 import connectors.subscription.create.SubscriptionCreationConnector
 import services.subscription.SubscriptionService
-import services.subscription.create.SubscriptionCreationService
+import services.subscription.create.SubscriptionCreationService.{Requests => ServiceRequests, Responses => ServiceResponses}
 
 class SubscriptionCreationConverterSpec extends BaseSpec {
 
@@ -37,9 +37,9 @@ class SubscriptionCreationConverterSpec extends BaseSpec {
         )
 
       forAll(idTypes) { (rawIdType, expectedRawType) =>
-        val idType = SubscriptionCreationService.Requests.IdType.all.find(_.toString == rawIdType).get
-        val serviceRequest = SubscriptionCreationService.Requests.Request(
-          id = SubscriptionCreationService.Requests.Id(idType, "AA000000A"),
+        val idType = ServiceRequests.IdType.all.find(_.toString == rawIdType).get
+        val serviceRequest = ServiceRequests.Request(
+          id = ServiceRequests.Id(idType, "AA000000A"),
           name = Some("Harold Winter"),
           contacts = Seq(
             SubscriptionService.Requests.Individual(
@@ -86,9 +86,9 @@ class SubscriptionCreationConverterSpec extends BaseSpec {
     "connector response" in {
       val connectorResponse = SubscriptionCreationConnector.Responses.Response("1cb6d341-4f17-446e-a549-b3e85f8f05f4")
 
-      val serviceResponse = converter.convertSuccessfulConnectorResponse(connectorResponse)
+      val serviceResponse = converter.convertSuccessfulConnectorResponse(Some(connectorResponse))
 
-      serviceResponse shouldBe SubscriptionService.Responses.Response("1cb6d341-4f17-446e-a549-b3e85f8f05f4")
+      serviceResponse shouldBe Some(ServiceResponses.Response("1cb6d341-4f17-446e-a549-b3e85f8f05f4"))
     }
 
   }

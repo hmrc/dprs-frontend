@@ -101,25 +101,27 @@ class RegistrationWithIdForOrganisationServiceSpec extends BaseBackendConnectorS
         val response = await(service.call(request))
 
         response shouldBe Right(
-          Response(
-            ids = Seq(
-              CommonRegistrationResponses.Id(CommonRegistrationResponses.IdType.ARN, "WARN1442450"),
-              CommonRegistrationResponses.Id(CommonRegistrationResponses.IdType.SAFE, "XE0000586571722"),
-              CommonRegistrationResponses.Id(CommonRegistrationResponses.IdType.SAP, "8231791429")
-            ),
-            name = "Dyson",
-            _type = Responses.Type.CorporateBody,
-            address = CommonRegistrationWithIdResponses.Address(lineOne = "2627 Gus Hill",
-                                                                lineTwo = Some("Apt. 898"),
-                                                                lineThree = Some(""),
-                                                                lineFour = Some("West Corrinamouth"),
-                                                                postalCode = "OX2 3HD",
-                                                                countryCode = "AD"
-            ),
-            contactDetails = CommonRegistrationWithIdResponses.ContactDetails(landline = Some("176905117"),
-                                                                              mobile = Some("62281724761"),
-                                                                              fax = Some("08959633679"),
-                                                                              emailAddress = Some("edward.goodenough@example.com")
+          Some(
+            Response(
+              ids = Seq(
+                CommonRegistrationResponses.Id(CommonRegistrationResponses.IdType.ARN, "WARN1442450"),
+                CommonRegistrationResponses.Id(CommonRegistrationResponses.IdType.SAFE, "XE0000586571722"),
+                CommonRegistrationResponses.Id(CommonRegistrationResponses.IdType.SAP, "8231791429")
+              ),
+              name = "Dyson",
+              _type = Responses.Type.CorporateBody,
+              address = CommonRegistrationWithIdResponses.Address(lineOne = "2627 Gus Hill",
+                                                                  lineTwo = Some("Apt. 898"),
+                                                                  lineThree = Some(""),
+                                                                  lineFour = Some("West Corrinamouth"),
+                                                                  postalCode = "OX2 3HD",
+                                                                  countryCode = "AD"
+              ),
+              contactDetails = CommonRegistrationWithIdResponses.ContactDetails(landline = Some("176905117"),
+                                                                                mobile = Some("62281724761"),
+                                                                                fax = Some("08959633679"),
+                                                                                emailAddress = Some("edward.goodenough@example.com")
+              )
             )
           )
         )

@@ -18,13 +18,10 @@ package converters.subscription
 
 import connectors.subscription.SubscriptionConnector.{Requests => ConnectorDataRequests}
 import converters.BaseConverter
-import services.subscription.SubscriptionService.{Requests => ServiceDataRequests, Responses => ServiceResponses}
+import services.subscription.SubscriptionService.{Requests => ServiceDataRequests}
 
-abstract class SubscriptionConverter[SERVICE_REQUEST, CONNECTOR_REQUEST, CONNECTOR_RESPONSE]
-    extends BaseConverter[SERVICE_REQUEST, CONNECTOR_REQUEST, CONNECTOR_RESPONSE, ServiceResponses.Response] {
-
-  override def convertSuccessfulConnectorResponse(response: CONNECTOR_RESPONSE): ServiceResponses.Response =
-    ServiceResponses.Response("OK")
+abstract class SubscriptionConverter[SERVICE_REQUEST, CONNECTOR_REQUEST, CONNECTOR_RESPONSE, SERVICE_RESPONSE]
+    extends BaseConverter[SERVICE_REQUEST, CONNECTOR_REQUEST, CONNECTOR_RESPONSE, SERVICE_RESPONSE] {
 
   protected def convert(contact: ServiceDataRequests.Contact): ConnectorDataRequests.Contact =
     contact match {

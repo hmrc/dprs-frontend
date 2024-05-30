@@ -19,7 +19,6 @@ package services.subscription.update
 import com.github.tomakehurst.wiremock.client.WireMock._
 import connectors.BaseConnector
 import connectors.subscription.update.SubscriptionUpdateConnector
-import org.scalatest.prop.TableDrivenPropertyChecks.forAll
 import play.api.http.Status._
 import services.BaseService.Responses.Error
 import services.subscription.SubscriptionService
@@ -86,7 +85,7 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
             )
           )
           val response = await(service.call(request))
-          response shouldBe Right(SubscriptionService.Responses.Response("OK"))
+          response shouldBe Right(None)
           verifyThatDownstreamApiWasCalled()
         }
         "there is only one contact, an individual" in {
@@ -129,7 +128,7 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
             )
           )
           val response = await(service.call(request))
-          response shouldBe Right(SubscriptionService.Responses.Response("OK"))
+          response shouldBe Right(None)
           verifyThatDownstreamApiWasCalled()
         }
         "there is only one contact, an organisation" in {
@@ -168,7 +167,7 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
             )
           )
           val response = await(service.call(request))
-          response shouldBe Right(SubscriptionService.Responses.Response("OK"))
+          response shouldBe Right(None)
           verifyThatDownstreamApiWasCalled()
         }
       }
@@ -386,7 +385,7 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
             "invalid-contact-2-email-address"
           )
           errorCodes.foreach { errorCode: String =>
-            info(errorCode)
+            info(s"$BAD_REQUEST -> $errorCode")
             stubFor(
               post(urlEqualTo(s"$connectorPath/a7405c8d-06ee-46a3-b5a0-5d65176360ed"))
                 .withRequestBody(equalToJson(
@@ -451,6 +450,88 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
             response shouldBe Left(
               BaseService.Responses.Errors(
                 BAD_REQUEST,
+                Seq(
+                  Error(errorCode)
+                )
+              )
+            )
+            verifyThatDownstreamApiWasCalled()
+          }
+        }
+        "invalid, with a status code of:" in {
+          val statusCodes = Map[Int, String](
+            INTERNAL_SERVER_ERROR -> "eis-returned-internal-server-error",
+            SERVICE_UNAVAILABLE   -> "eis-returned-service-unavailable",
+            CONFLICT              -> "eis-returned-conflict",
+            UNAUTHORIZED          -> "eis-returned-unauthorized",
+            FORBIDDEN             -> "eis-returned-forbidden"
+          )
+          statusCodes.keySet.foreach { statusCode: Int =>
+            val errorCode = statusCodes.getOrElse(statusCode, throw new NoSuchElementException)
+            info(s"$statusCode -> $errorCode")
+            stubFor(
+              post(urlEqualTo(s"$connectorPath/a7405c8d-06ee-46a3-b5a0-5d65176360ed"))
+                .withRequestBody(equalToJson(
+                  """
+                    |{
+                    |    "name": "Harold Winter",
+                    |    "contacts": [
+                    |        {
+                    |            "type": "I",
+                    |            "firstName": "Patrick",
+                    |            "middleName": "John",
+                    |            "lastName": "Dyson",
+                    |            "landline": "747663966",
+                    |            "mobile": "38390756243",
+                    |            "emailAddress": "Patrick.Dyson@example.com"
+                    |        },
+                    |        {
+                    |            "type": "O",
+                    |            "name": "Dyson",
+                    |            "landline": "847663966",
+                    |            "mobile": "48390756243",
+                    |            "emailAddress": "info@example.com"
+                    |        }
+                    |    ]
+                    |}
+                    |""".stripMargin))
+                .willReturn(
+                  aResponse()
+                    .withHeader("Content-Type", "application/json")
+                    .withStatus(statusCode)
+                    .withBody(s"""
+                        |[
+                        |  {
+                        |    "code": "$errorCode"
+                        |  }
+                        |]
+                        |""".stripMargin)
+                )
+            )
+            val request = SubscriptionUpdateService.Requests.Request(
+              id = "a7405c8d-06ee-46a3-b5a0-5d65176360ed",
+              name = Some("Harold Winter"),
+              contacts = Seq(
+                SubscriptionService.Requests.Individual(
+                  firstName = "Patrick",
+                  middleName = Some("John"),
+                  lastName = "Dyson",
+                  landline = Some("747663966"),
+                  mobile = Some("38390756243"),
+                  emailAddress = "Patrick.Dyson@example.com"
+                ),
+                SubscriptionService.Requests.Organisation(
+                  name = "Dyson",
+                  landline = Some("847663966"),
+                  mobile = Some("48390756243"),
+                  emailAddress = "info@example.com"
+                )
+              )
+            )
+            val response = await(service.call(request))
+            response shouldBe Left(
+              BaseService.Responses.Errors(
+                statusCode,
                 Seq(
                   Error(errorCode)
                 )

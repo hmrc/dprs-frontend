@@ -80,14 +80,16 @@ class RegistrationWithoutIdForIndividualConverterSpec extends BaseSpec {
         )
       )
 
-      val serviceResponse = converter.convertSuccessfulConnectorResponse(connectorResponse)
+      val serviceResponse = converter.convertSuccessfulConnectorResponse(Some(connectorResponse))
 
-      serviceResponse shouldBe CommonRegistrationResponses.Response(
-        Seq(
-          CommonRegistrationResponses.Id(CommonRegistrationResponses.IdType.ARN, "WARN3849921"),
-          CommonRegistrationResponses.Id(CommonRegistrationResponses.IdType.SAFE, "XE0000200775706"),
-          CommonRegistrationResponses.Id(CommonRegistrationResponses.IdType.SAP, "1960629967"),
-          CommonRegistrationResponses.Id(CommonRegistrationResponses.IdType.UNKNOWN, "25562288-ae0d-447a-863a-aac881b287a9")
+      serviceResponse shouldBe Some(
+        CommonRegistrationResponses.Response(
+          Seq(
+            CommonRegistrationResponses.Id(CommonRegistrationResponses.IdType.ARN, "WARN3849921"),
+            CommonRegistrationResponses.Id(CommonRegistrationResponses.IdType.SAFE, "XE0000200775706"),
+            CommonRegistrationResponses.Id(CommonRegistrationResponses.IdType.SAP, "1960629967"),
+            CommonRegistrationResponses.Id(CommonRegistrationResponses.IdType.UNKNOWN, "25562288-ae0d-447a-863a-aac881b287a9")
+          )
         )
       )
     }

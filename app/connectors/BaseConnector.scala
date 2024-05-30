@@ -16,11 +16,11 @@
 
 package connectors
 
-import connectors.BaseConnector.Exceptions.{ResponseExpectedException, ResponseParsingException}
+import connectors.BaseConnector.Exceptions.ResponseParsingException
 import connectors.BaseConnector.Responses.Errors
 import play.api.http.Status.{NO_CONTENT, OK}
 import play.api.libs.json.Json.toJson
-import play.api.libs.json.{JsPath, Reads, Writes}
+import play.api.libs.json.{JsPath, JsSuccess, Reads, Writes}
 import play.api.libs.ws.{WSClient, WSResponse}
 
 import java.net.URL
@@ -29,7 +29,7 @@ import scala.util.{Failure, Success, Try}
 
 abstract class BaseConnector[REQUEST, RESPONSE](wsClient: WSClient) {
 
-  def call(request: REQUEST)(implicit executionContext: ExecutionContext): Future[Either[BaseConnector.Responses.Errors, RESPONSE]]
+  def call(request: REQUEST)(implicit executionContext: ExecutionContext): Future[Either[BaseConnector.Responses.Errors, Option[RESPONSE]]]
 
   /** We would have liked to use HttpClientV2, but when it encounters a 400 or 500 status code, the response body is inaccessible.
     */
@@ -54,11 +54,8 @@ abstract class BaseConnector[REQUEST, RESPONSE](wsClient: WSClient) {
     executionContext: ExecutionContext,
     writes: Writes[REQUEST],
     reads: Reads[RESPONSE]
-  ): Future[Either[Errors, RESPONSE]] =
-    post(baseUrl(), request).map {
-      case Left(error)     => Left(error)
-      case Right(response) => Right(response.getOrElse(throw new ResponseExpectedException()))
-    }
+  ): Future[Either[Errors, Option[RESPONSE]]] =
+    post(baseUrl(), request)
 
   def baseUrl(): URL
 
@@ -85,11 +82,15 @@ object BaseConnector {
 
   object Exceptions {
     final class ResponseParsingException extends RuntimeException
-    final class ResponseExpectedException extends RuntimeException
-    final class ResponseUnexpectedException extends RuntimeException
   }
 
   object Responses {
+
+    final case class EmptyResponse()
+
+    object EmptyResponse {
+      implicit lazy val reads: Reads[EmptyResponse] = Reads.apply(_ => JsSuccess(EmptyResponse()))
+    }
 
     final case class Errors(status: Int, errors: Seq[Error] = Seq.empty)
 

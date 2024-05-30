@@ -34,13 +34,15 @@ class RegistrationWithIdForOrganisationConverter
   override def convertServiceRequest(request: ServiceRequests.Request): ConnectorRequests.Request =
     ConnectorRequests.Request(id = convert(request.id), name = request.name, _type = convert(request._type))
 
-  override def convertSuccessfulConnectorResponse(response: ConnectorResponses.Response): ServiceResponses.Response =
-    ServiceResponses.Response(
-      ids = response.ids.map(convert),
-      name = response.name,
-      _type = convertResponseType(response._type),
-      address = convert(response.address),
-      contactDetails = convert(response.contactDetails)
+  override def convertSuccessfulConnectorResponse(responseOpt: Option[ConnectorResponses.Response]): Option[ServiceResponses.Response] =
+    responseOpt.map(response =>
+      ServiceResponses.Response(
+        ids = response.ids.map(convert),
+        name = response.name,
+        _type = convertResponseType(response._type),
+        address = convert(response.address),
+        contactDetails = convert(response.contactDetails)
+      )
     )
 
   private def convert(id: ServiceRequests.Id): RegistrationWithIdConnector.Requests.Id =

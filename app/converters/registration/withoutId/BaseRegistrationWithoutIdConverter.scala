@@ -23,8 +23,8 @@ import services.registration.withoutId.BaseRegistrationWithoutIdService.{Request
 abstract class BaseRegistrationWithoutIdConverter[SERVICE_REQUEST, CONNECTOR_REQUEST]
     extends converters.registration.BaseRegistrationConverter[SERVICE_REQUEST, CONNECTOR_REQUEST, ConnectorResponses.Response, ServiceResponses.Response] {
 
-  override def convertSuccessfulConnectorResponse(response: ConnectorResponses.Response): ServiceResponses.Response =
-    ServiceResponses.Response(ids = response.ids.map(convert))
+  override def convertSuccessfulConnectorResponse(response: Option[ConnectorResponses.Response]): Option[ServiceResponses.Response] =
+    response.map(response => ServiceResponses.Response(ids = response.ids.map(convert)))
 
   protected def convert(address: ServiceRequests.Address): ConnectorRequests.Address =
     ConnectorRequests.Address(

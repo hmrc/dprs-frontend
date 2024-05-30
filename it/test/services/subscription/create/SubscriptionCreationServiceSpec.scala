@@ -22,6 +22,7 @@ import connectors.subscription.create.SubscriptionCreationConnector
 import play.api.http.Status._
 import services.BaseService.Responses.Error
 import services.subscription.SubscriptionService
+import services.subscription.create.SubscriptionCreationService.{Responses => ServiceResponses}
 import services.{BaseBackendConnectorSpec, BaseService}
 
 class SubscriptionCreationServiceSpec extends BaseBackendConnectorSpec {
@@ -96,7 +97,7 @@ class SubscriptionCreationServiceSpec extends BaseBackendConnectorSpec {
 
           val response = await(service.call(request))
 
-          response shouldBe Right(SubscriptionService.Responses.Response("c763df13-41b3-46d3-bff2-08c090b860dc"))
+          response shouldBe Right(Some(ServiceResponses.Response("c763df13-41b3-46d3-bff2-08c090b860dc")))
           verifyThatDownstreamApiWasCalled()
         }
         "there is only contact, an individual" in {
@@ -151,7 +152,7 @@ class SubscriptionCreationServiceSpec extends BaseBackendConnectorSpec {
 
           val response = await(service.call(request))
 
-          response shouldBe Right(SubscriptionService.Responses.Response("c763df13-41b3-46d3-bff2-08c090b860dc"))
+          response shouldBe Right(Some(ServiceResponses.Response("c763df13-41b3-46d3-bff2-08c090b860dc")))
           verifyThatDownstreamApiWasCalled()
         }
         "there is only contact, an organisation" in {
@@ -201,7 +202,7 @@ class SubscriptionCreationServiceSpec extends BaseBackendConnectorSpec {
 
           val response = await(service.call(request))
 
-          response shouldBe Right(SubscriptionService.Responses.Response("c763df13-41b3-46d3-bff2-08c090b860dc"))
+          response shouldBe Right(Some(ServiceResponses.Response("c763df13-41b3-46d3-bff2-08c090b860dc")))
           verifyThatDownstreamApiWasCalled()
         }
       }

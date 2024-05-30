@@ -17,17 +17,17 @@
 package services.subscription.update
 
 import com.google.inject.{Inject, Singleton}
+import connectors.BaseConnector
 import connectors.subscription.update.SubscriptionUpdateConnector
-import connectors.subscription.update.SubscriptionUpdateConnector.{Requests => ConnectorRequests, Responses => ConnectorResponses}
+import connectors.subscription.update.SubscriptionUpdateConnector.{Requests => ConnectorRequests}
 import converters.subscription.update.SubscriptionUpdateConverter
 import services.BaseService
 import services.subscription.SubscriptionService.Requests.Contact
 import services.subscription.update.SubscriptionUpdateService.{Requests => ServiceRequests}
-import services.subscription.SubscriptionService.{Responses => ServiceResponses}
 
 @Singleton
 class SubscriptionUpdateService @Inject() (connector: SubscriptionUpdateConnector, converter: SubscriptionUpdateConverter)
-    extends BaseService[ServiceRequests.Request, ServiceResponses.Response, ConnectorRequests.Request, ConnectorResponses.Response](
+    extends BaseService[ServiceRequests.Request, BaseService.Responses.EmptyResponse, ConnectorRequests.Request, BaseConnector.Responses.EmptyResponse](
       connector,
       converter
     )
