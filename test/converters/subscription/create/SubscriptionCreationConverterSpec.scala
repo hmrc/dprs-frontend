@@ -17,8 +17,10 @@
 package converters.subscription.create
 
 import base.BaseSpec
+import connectors.subscription.SubscriptionConnector
 import connectors.subscription.create.SubscriptionCreationConnector
-import services.subscription.create.SubscriptionCreationService
+import services.subscription.SubscriptionService
+import services.subscription.create.SubscriptionCreationService.{Requests => ServiceRequests, Responses => ServiceResponses}
 
 class SubscriptionCreationConverterSpec extends BaseSpec {
 
@@ -35,12 +37,12 @@ class SubscriptionCreationConverterSpec extends BaseSpec {
         )
 
       forAll(idTypes) { (rawIdType, expectedRawType) =>
-        val idType = SubscriptionCreationService.Requests.IdType.all.find(_.toString == rawIdType).get
-        val serviceRequest = SubscriptionCreationService.Requests.Request(
-          id = SubscriptionCreationService.Requests.Id(idType, "AA000000A"),
+        val idType = ServiceRequests.IdType.all.find(_.toString == rawIdType).get
+        val serviceRequest = ServiceRequests.Request(
+          id = ServiceRequests.Id(idType, "AA000000A"),
           name = Some("Harold Winter"),
           contacts = Seq(
-            SubscriptionCreationService.Requests.Individual(
+            SubscriptionService.Requests.Individual(
               firstName = "Patrick",
               middleName = Some("John"),
               lastName = "Dyson",
@@ -48,10 +50,10 @@ class SubscriptionCreationConverterSpec extends BaseSpec {
               mobile = Some("38390756243"),
               emailAddress = "Patrick.Dyson@example.com"
             ),
-            SubscriptionCreationService.Requests.Organisation(name = "Dyson",
-                                                              landline = Some("847663966"),
-                                                              mobile = Some("48390756243"),
-                                                              emailAddress = "info@example.com"
+            SubscriptionService.Requests.Organisation(name = "Dyson",
+                                                      landline = Some("847663966"),
+                                                      mobile = Some("48390756243"),
+                                                      emailAddress = "info@example.com"
             )
           )
         )
@@ -62,7 +64,7 @@ class SubscriptionCreationConverterSpec extends BaseSpec {
           id = SubscriptionCreationConnector.Requests.Id(expectedRawType, "AA000000A"),
           name = Some("Harold Winter"),
           contacts = Seq(
-            SubscriptionCreationConnector.Requests.Individual(
+            SubscriptionConnector.Requests.Individual(
               typeCode = "I",
               firstName = "Patrick",
               middleName = Some("John"),
@@ -71,11 +73,11 @@ class SubscriptionCreationConverterSpec extends BaseSpec {
               mobile = Some("38390756243"),
               emailAddress = "Patrick.Dyson@example.com"
             ),
-            SubscriptionCreationConnector.Requests.Organisation(typeCode = "O",
-                                                                name = "Dyson",
-                                                                landline = Some("847663966"),
-                                                                mobile = Some("48390756243"),
-                                                                emailAddress = "info@example.com"
+            SubscriptionConnector.Requests.Organisation(typeCode = "O",
+                                                        name = "Dyson",
+                                                        landline = Some("847663966"),
+                                                        mobile = Some("48390756243"),
+                                                        emailAddress = "info@example.com"
             )
           )
         )
@@ -84,9 +86,9 @@ class SubscriptionCreationConverterSpec extends BaseSpec {
     "connector response" in {
       val connectorResponse = SubscriptionCreationConnector.Responses.Response("1cb6d341-4f17-446e-a549-b3e85f8f05f4")
 
-      val serviceResponse = converter.convertSuccessfulConnectorResponse(connectorResponse)
+      val serviceResponse = converter.convertSuccessfulConnectorResponse(Some(connectorResponse))
 
-      serviceResponse shouldBe SubscriptionCreationService.Responses.Response("1cb6d341-4f17-446e-a549-b3e85f8f05f4")
+      serviceResponse shouldBe Some(ServiceResponses.Response("1cb6d341-4f17-446e-a549-b3e85f8f05f4"))
     }
 
   }

@@ -36,7 +36,7 @@ class RegistrationWithIdForIndividualConnector @Inject() (frontendAppConfig: Fro
 
   override def call(request: Request)(implicit
     executionContext: ExecutionContext
-  ): Future[Either[BaseConnector.Responses.Errors, Response]] =
+  ): Future[Either[BaseConnector.Responses.Errors, Option[Response]]] =
     post(request)
 
 }

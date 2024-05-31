@@ -21,6 +21,7 @@ import connectors.subscription.create.SubscriptionCreationConnector
 import connectors.subscription.create.SubscriptionCreationConnector.{Requests => ConnectorRequests, Responses => ConnectorResponses}
 import converters.subscription.create.SubscriptionCreationConverter
 import services.BaseService
+import services.subscription.SubscriptionService.Requests.Contact
 import services.subscription.create.SubscriptionCreationService.{Requests => ServiceRequests, Responses => ServiceResponses}
 
 @Singleton
@@ -51,31 +52,9 @@ object SubscriptionCreationService {
       case object SAFE extends IdType
 
     }
-
-    sealed trait Contact {
-      def landline: Option[String]
-
-      def mobile: Option[String]
-
-      def emailAddress: String
-    }
-
-    final case class Individual(firstName: String,
-                                middleName: Option[String],
-                                lastName: String,
-                                landline: Option[String],
-                                mobile: Option[String],
-                                emailAddress: String
-    ) extends Contact
-
-    final case class Organisation(name: String, landline: Option[String], mobile: Option[String], emailAddress: String) extends Contact
-
   }
 
   object Responses {
-
     final case class Response(id: String)
-
   }
-
 }

@@ -16,40 +16,26 @@
 
 package converters.subscription.create
 
-import connectors.subscription.create.SubscriptionCreationConnector
-import connectors.subscription.create.SubscriptionCreationConnector.{Requests => ConnectorRequests, Responses => ConnectorResponses}
-import converters.BaseConverter
-import services.subscription.create.SubscriptionCreationService
+import connectors.subscription.create.SubscriptionCreationConnector.Responses.Response
+import connectors.subscription.create.SubscriptionCreationConnector.{Requests => ConnectorCreateRequests, Responses => ConnectorResponses}
+import converters.subscription.SubscriptionConverter
 import services.subscription.create.SubscriptionCreationService.{Requests => ServiceRequests, Responses => ServiceResponses}
 
 class SubscriptionCreationConverter
-    extends BaseConverter[ServiceRequests.Request,
-                          ConnectorRequests.Request,
-                          SubscriptionCreationConnector.Responses.Response,
-                          SubscriptionCreationService.Responses.Response
-    ] {
+    extends SubscriptionConverter[ServiceRequests.Request, ConnectorCreateRequests.Request, ConnectorResponses.Response, ServiceResponses.Response] {
 
-  override def convertServiceRequest(request: ServiceRequests.Request): ConnectorRequests.Request =
-    ConnectorRequests.Request(id = convert(request.id), name = request.name, contacts = request.contacts.map(convert))
+  override def convertServiceRequest(request: ServiceRequests.Request): ConnectorCreateRequests.Request =
+    ConnectorCreateRequests.Request(id = convert(request.id), name = request.name, contacts = request.contacts.map(convert))
 
-  override def convertSuccessfulConnectorResponse(response: ConnectorResponses.Response): ServiceResponses.Response =
-    ServiceResponses.Response(response.id)
+  override def convertSuccessfulConnectorResponse(responseOpt: Option[Response]): Option[ServiceResponses.Response] =
+    responseOpt.map(response => ServiceResponses.Response(response.id))
 
-  private def convert(id: ServiceRequests.Id): ConnectorRequests.Id =
-    ConnectorRequests.Id(convert(id.idType), id.value)
+  private def convert(id: ServiceRequests.Id): ConnectorCreateRequests.Id =
+    ConnectorCreateRequests.Id(convert(id.idType), id.value)
 
   private def convert(idType: ServiceRequests.IdType): String = idType match {
     case ServiceRequests.IdType.NINO => "NINO"
     case ServiceRequests.IdType.SAFE => "SAFE"
     case ServiceRequests.IdType.UTR  => "UTR"
   }
-
-  private def convert(contact: ServiceRequests.Contact): SubscriptionCreationConnector.Requests.Contact =
-    contact match {
-      case ServiceRequests.Individual(firstName, middleName, lastName, landline, mobile, emailAddress) =>
-        ConnectorRequests.Individual("I", firstName, middleName, lastName, landline, mobile, emailAddress)
-      case ServiceRequests.Organisation(name, landline, mobile, emailAddress) =>
-        ConnectorRequests.Organisation("O", name, landline, mobile, emailAddress)
-    }
-
 }

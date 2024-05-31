@@ -83,33 +83,35 @@ class RegistrationWithIdForIndividualConverterSpec extends BaseSpec {
         )
       )
 
-      val serviceResponse = converter.convertSuccessfulConnectorResponse(connectorResponse)
+      val serviceResponse = converter.convertSuccessfulConnectorResponse(Some(connectorResponse))
 
-      serviceResponse shouldBe RegistrationWithIdForIndividualService.Responses.Response(
-        ids = Seq(
-          services.registration.BaseRegistrationService.Responses.Id(services.registration.BaseRegistrationService.Responses.IdType.ARN, "WARN3849921"),
-          services.registration.BaseRegistrationService.Responses.Id(services.registration.BaseRegistrationService.Responses.IdType.SAFE, "XE0000200775706"),
-          services.registration.BaseRegistrationService.Responses.Id(services.registration.BaseRegistrationService.Responses.IdType.SAP, "1960629967"),
-          services.registration.BaseRegistrationService.Responses.Id(services.registration.BaseRegistrationService.Responses.IdType.UNKNOWN,
-                                                                     "25562288-ae0d-447a-863a-aac881b287a9"
+      serviceResponse shouldBe Some(
+        RegistrationWithIdForIndividualService.Responses.Response(
+          ids = Seq(
+            services.registration.BaseRegistrationService.Responses.Id(services.registration.BaseRegistrationService.Responses.IdType.ARN, "WARN3849921"),
+            services.registration.BaseRegistrationService.Responses.Id(services.registration.BaseRegistrationService.Responses.IdType.SAFE, "XE0000200775706"),
+            services.registration.BaseRegistrationService.Responses.Id(services.registration.BaseRegistrationService.Responses.IdType.SAP, "1960629967"),
+            services.registration.BaseRegistrationService.Responses.Id(services.registration.BaseRegistrationService.Responses.IdType.UNKNOWN,
+                                                                       "25562288-ae0d-447a-863a-aac881b287a9"
+            )
+          ),
+          firstName = "Patrick",
+          middleName = Some("John"),
+          lastName = "Dyson",
+          dateOfBirth = Some("1970-10-04"),
+          address = services.registration.withId.BaseRegistrationWithIdService.Responses.Address(
+            lineOne = "26424 Cecelia Junction",
+            lineTwo = Some("Suite 858"),
+            lineThree = None,
+            lineFour = Some("West Siobhanberg"),
+            postalCode = "OX2 3HD",
+            countryCode = "AD"
+          ),
+          contactDetails = services.registration.withId.BaseRegistrationWithIdService.Responses.ContactDetails(landline = Some("747663966"),
+                                                                                                               mobile = Some("38390756243"),
+                                                                                                               fax = Some("58371813020"),
+                                                                                                               emailAddress = Some("Patrick.Dyson@example.com")
           )
-        ),
-        firstName = "Patrick",
-        middleName = Some("John"),
-        lastName = "Dyson",
-        dateOfBirth = Some("1970-10-04"),
-        address = services.registration.withId.BaseRegistrationWithIdService.Responses.Address(
-          lineOne = "26424 Cecelia Junction",
-          lineTwo = Some("Suite 858"),
-          lineThree = None,
-          lineFour = Some("West Siobhanberg"),
-          postalCode = "OX2 3HD",
-          countryCode = "AD"
-        ),
-        contactDetails = services.registration.withId.BaseRegistrationWithIdService.Responses.ContactDetails(landline = Some("747663966"),
-                                                                                                             mobile = Some("38390756243"),
-                                                                                                             fax = Some("58371813020"),
-                                                                                                             emailAddress = Some("Patrick.Dyson@example.com")
         )
       )
     }

@@ -18,9 +18,9 @@ package connectors
 
 import connectors.BaseConnector.Exceptions.ResponseParsingException
 import connectors.BaseConnector.Responses.Errors
-import play.api.http.Status.OK
+import play.api.http.Status.{NO_CONTENT, OK}
 import play.api.libs.json.Json.toJson
-import play.api.libs.json.{JsPath, Reads, Writes}
+import play.api.libs.json.{JsPath, JsSuccess, Reads, Writes}
 import play.api.libs.ws.{WSClient, WSResponse}
 
 import java.net.URL
@@ -29,36 +29,47 @@ import scala.util.{Failure, Success, Try}
 
 abstract class BaseConnector[REQUEST, RESPONSE](wsClient: WSClient) {
 
-  def call(request: REQUEST)(implicit executionContext: ExecutionContext): Future[Either[BaseConnector.Responses.Errors, RESPONSE]]
+  def call(request: REQUEST)(implicit executionContext: ExecutionContext): Future[Either[BaseConnector.Responses.Errors, Option[RESPONSE]]]
 
   /** We would have liked to use HttpClientV2, but when it encounters a 400 or 500 status code, the response body is inaccessible.
     */
-  def post(request: REQUEST)(implicit
+  def post(url: URL, request: REQUEST)(implicit
     executionContext: ExecutionContext,
     writes: Writes[REQUEST],
     reads: Reads[RESPONSE]
-  ): Future[Either[Errors, RESPONSE]] =
+  ): Future[Either[Errors, Option[RESPONSE]]] =
     wsClient
-      .url(url().toString)
+      .url(url.toString)
       .post(toJson(request))
       .transform {
         case Success(wsResponse) =>
           wsResponse.status match {
-            case OK              => asResponse(wsResponse)
+            case OK | NO_CONTENT => asResponse(wsResponse)
             case otherStatusCode => asErrors(otherStatusCode, wsResponse)
           }
         case Failure(exception) => Failure(exception)
       }
 
-  def url(): URL
+  def post(request: REQUEST)(implicit
+    executionContext: ExecutionContext,
+    writes: Writes[REQUEST],
+    reads: Reads[RESPONSE]
+  ): Future[Either[Errors, Option[RESPONSE]]] =
+    post(baseUrl(), request)
 
-  private def asResponse(wsResponse: WSResponse)(implicit reads: Reads[RESPONSE]): Try[Either[Errors, RESPONSE]] =
-    wsResponse.json
-      .validate[RESPONSE]
-      .map(response => Success(Right(response)))
-      .getOrElse(Failure(new ResponseParsingException()))
+  def baseUrl(): URL
 
-  private def asErrors(statusCode: Int, wsResponse: WSResponse): Try[Either[Errors, RESPONSE]] =
+  private def asResponse(wsResponse: WSResponse)(implicit reads: Reads[RESPONSE]): Try[Either[Errors, Option[RESPONSE]]] =
+    wsResponse.status match {
+      case NO_CONTENT => Success(Right(None))
+      case _ =>
+        wsResponse.json
+          .validate[RESPONSE]
+          .map(response => Success(Right(Some(response))))
+          .getOrElse(Failure(new ResponseParsingException()))
+    }
+
+  private def asErrors(statusCode: Int, wsResponse: WSResponse): Try[Either[Errors, Option[RESPONSE]]] =
     if (wsResponse.body.nonEmpty)
       wsResponse.json
         .validate[Seq[BaseConnector.Responses.Error]]
@@ -75,6 +86,12 @@ object BaseConnector {
 
   object Responses {
 
+    final case class EmptyResponse()
+
+    object EmptyResponse {
+      implicit lazy val reads: Reads[EmptyResponse] = Reads.apply(_ => JsSuccess(EmptyResponse()))
+    }
+
     final case class Errors(status: Int, errors: Seq[Error] = Seq.empty)
 
     final case class Error(code: String)
@@ -84,5 +101,4 @@ object BaseConnector {
         (JsPath \ "code").read[String].map(Error(_))
     }
   }
-
 }

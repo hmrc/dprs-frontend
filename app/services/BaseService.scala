@@ -18,6 +18,7 @@ package services
 
 import connectors.BaseConnector
 import converters.BaseConverter
+import play.api.libs.json.{JsSuccess, Reads}
 import services.BaseService.Responses
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -29,10 +30,10 @@ class BaseService[SERVICE_REQUEST, SERVICE_RESPONSE, CONNECTOR_REQUEST, CONNECTO
 
   final def call(request: SERVICE_REQUEST)(implicit
     executionContext: ExecutionContext
-  ): Future[Either[Responses.Errors, SERVICE_RESPONSE]] =
+  ): Future[Either[Responses.Errors, Option[SERVICE_RESPONSE]]] =
     connector.call(converter.convertServiceRequest(request)).map {
-      case Right(response) => Right(converter.convertSuccessfulConnectorResponse(response))
-      case Left(errors)    => Left(converter.convertFailedConnectorResponse(errors))
+      case Right(responseOpt) => Right(converter.convertSuccessfulConnectorResponse(responseOpt))
+      case Left(errors)       => Left(converter.convertFailedConnectorResponse(errors))
     }
 
 }
@@ -40,6 +41,12 @@ class BaseService[SERVICE_REQUEST, SERVICE_RESPONSE, CONNECTOR_REQUEST, CONNECTO
 object BaseService {
 
   object Responses {
+
+    final case class EmptyResponse()
+
+    object EmptyResponse {
+      implicit lazy val reads: Reads[EmptyResponse] = Reads.apply(_ => JsSuccess(EmptyResponse()))
+    }
 
     final case class Errors(status: Int, errors: Seq[Error] = Seq.empty)
 

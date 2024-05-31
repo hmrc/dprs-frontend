@@ -18,11 +18,12 @@ package connectors.subscription.create
 
 import com.google.inject.{Inject, Singleton}
 import config.FrontendAppConfig
+import connectors.subscription.SubscriptionConnector.Requests.Contact
 import connectors.subscription.create.SubscriptionCreationConnector.Requests.Request
 import connectors.subscription.create.SubscriptionCreationConnector.Responses.Response
 import connectors.{BaseBackendConnector, BaseConnector}
 import play.api.libs.functional.syntax.{toFunctionalBuilderOps, unlift}
-import play.api.libs.json.{JsPath, Json, OWrites, Reads}
+import play.api.libs.json.{JsPath, OWrites, Reads}
 import play.api.libs.ws.WSClient
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -35,7 +36,7 @@ class SubscriptionCreationConnector @Inject() (frontendAppConfig: FrontendAppCon
 
   override def call(request: Request)(implicit
     executionContext: ExecutionContext
-  ): Future[Either[BaseConnector.Responses.Errors, Response]] =
+  ): Future[Either[BaseConnector.Responses.Errors, Option[Response]]] =
     post(request)
 
 }
@@ -62,53 +63,6 @@ object SubscriptionCreationConnector {
         ((JsPath \ "type").write[String] and
           (JsPath \ "value").write[String])(unlift(Id.unapply))
     }
-
-    sealed trait Contact {
-
-      def typeCode: String
-
-      def landline: Option[String]
-
-      def mobile: Option[String]
-
-      def emailAddress: String
-    }
-
-    object Contact {
-      implicit lazy val writes: OWrites[Contact] = Json.writes[Contact].transform(jsObject => jsObject - "_type")
-    }
-
-    final case class Individual(typeCode: String,
-                                firstName: String,
-                                middleName: Option[String],
-                                lastName: String,
-                                landline: Option[String],
-                                mobile: Option[String],
-                                emailAddress: String
-    ) extends Contact
-
-    object Individual {
-      implicit lazy val writes: OWrites[Individual] =
-        ((JsPath \ "type").write[String] and
-          (JsPath \ "firstName").write[String] and
-          (JsPath \ "middleName").writeNullable[String] and
-          (JsPath \ "lastName").write[String] and
-          (JsPath \ "landline").writeNullable[String] and
-          (JsPath \ "mobile").writeNullable[String] and
-          (JsPath \ "emailAddress").write[String])(unlift(Individual.unapply))
-    }
-
-    final case class Organisation(typeCode: String, name: String, landline: Option[String], mobile: Option[String], emailAddress: String) extends Contact
-
-    object Organisation {
-      implicit lazy val writes: OWrites[Organisation] =
-        ((JsPath \ "type").write[String] and
-          (JsPath \ "name").write[String] and
-          (JsPath \ "landline").writeNullable[String] and
-          (JsPath \ "mobile").writeNullable[String] and
-          (JsPath \ "emailAddress").write[String])(unlift(Organisation.unapply))
-    }
-
   }
 
   object Responses {
@@ -121,5 +75,4 @@ object SubscriptionCreationConnector {
 
     }
   }
-
 }

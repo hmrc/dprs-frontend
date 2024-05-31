@@ -72,15 +72,17 @@ class RegistrationWithoutIdForOrganisationConverterSpec extends BaseSpec {
         )
       )
 
-      val serviceResponse = converter.convertSuccessfulConnectorResponse(connectorResponse)
+      val serviceResponse = converter.convertSuccessfulConnectorResponse(Some(connectorResponse))
 
-      serviceResponse shouldBe services.registration.BaseRegistrationService.Responses.Response(
-        Seq(
-          services.registration.BaseRegistrationService.Responses.Id(services.registration.BaseRegistrationService.Responses.IdType.ARN, "WARN3849921"),
-          services.registration.BaseRegistrationService.Responses.Id(services.registration.BaseRegistrationService.Responses.IdType.SAFE, "XE0000200775706"),
-          services.registration.BaseRegistrationService.Responses.Id(services.registration.BaseRegistrationService.Responses.IdType.SAP, "1960629967"),
-          services.registration.BaseRegistrationService.Responses.Id(services.registration.BaseRegistrationService.Responses.IdType.UNKNOWN,
-                                                                     "25562288-ae0d-447a-863a-aac881b287a9"
+      serviceResponse shouldBe Some(
+        services.registration.BaseRegistrationService.Responses.Response(
+          Seq(
+            services.registration.BaseRegistrationService.Responses.Id(services.registration.BaseRegistrationService.Responses.IdType.ARN, "WARN3849921"),
+            services.registration.BaseRegistrationService.Responses.Id(services.registration.BaseRegistrationService.Responses.IdType.SAFE, "XE0000200775706"),
+            services.registration.BaseRegistrationService.Responses.Id(services.registration.BaseRegistrationService.Responses.IdType.SAP, "1960629967"),
+            services.registration.BaseRegistrationService.Responses.Id(services.registration.BaseRegistrationService.Responses.IdType.UNKNOWN,
+                                                                       "25562288-ae0d-447a-863a-aac881b287a9"
+            )
           )
         )
       )

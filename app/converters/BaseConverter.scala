@@ -23,7 +23,7 @@ abstract class BaseConverter[SERVICE_REQUEST, CONNECTOR_REQUEST, CONNECTOR_RESPO
 
   def convertServiceRequest(serviceRequest: SERVICE_REQUEST): CONNECTOR_REQUEST
 
-  def convertSuccessfulConnectorResponse(connectorResponse: CONNECTOR_RESPONSE): SERVICE_RESPONSE
+  def convertSuccessfulConnectorResponse(connectorResponse: Option[CONNECTOR_RESPONSE]): Option[SERVICE_RESPONSE]
 
   def convertFailedConnectorResponse(errors: BaseConnector.Responses.Errors): BaseService.Responses.Errors =
     BaseService.Responses.Errors(status = errors.status, errors = errors.errors.map(convert))

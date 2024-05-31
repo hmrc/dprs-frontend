@@ -31,15 +31,17 @@ class RegistrationWithIdForIndividualConverter
                               dateOfBirth = request.dateOfBirth
     )
 
-  override def convertSuccessfulConnectorResponse(response: ConnectorResponses.Response): ServiceResponses.Response =
-    ServiceResponses.Response(
-      ids = response.ids.map(convert),
-      firstName = response.firstName,
-      middleName = response.middleName,
-      lastName = response.lastName,
-      dateOfBirth = response.dateOfBirth,
-      address = convert(response.address),
-      contactDetails = convert(response.contactDetails)
+  override def convertSuccessfulConnectorResponse(responseOpt: Option[ConnectorResponses.Response]): Option[ServiceResponses.Response] =
+    responseOpt.map(response =>
+      ServiceResponses.Response(
+        ids = response.ids.map(convert),
+        firstName = response.firstName,
+        middleName = response.middleName,
+        lastName = response.lastName,
+        dateOfBirth = response.dateOfBirth,
+        address = convert(response.address),
+        contactDetails = convert(response.contactDetails)
+      )
     )
 
   private def convert(id: ServiceRequests.Id): RegistrationWithIdConnector.Requests.Id =
