@@ -23,11 +23,10 @@ import services.BaseService
 import services.subscription.update.SubscriptionUpdateService.{Requests => ServiceCreateRequests}
 
 class SubscriptionUpdateConverter
-    extends SubscriptionConverter[
-      ServiceCreateRequests.Request,
-      ConnectorUpdateRequests.Request,
-      BaseConnector.Responses.EmptyResponse,
-      BaseService.Responses.EmptyResponse
+    extends SubscriptionConverter[ServiceCreateRequests.Request,
+                                  ConnectorUpdateRequests.Request,
+                                  BaseConnector.Responses.EmptyResponse,
+                                  BaseService.Responses.EmptyResponse
     ] {
 
   override def convertSuccessfulConnectorResponse(response: Option[BaseConnector.Responses.EmptyResponse]): Option[BaseService.Responses.EmptyResponse] = None

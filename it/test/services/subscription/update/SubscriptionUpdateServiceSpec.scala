@@ -17,7 +17,6 @@
 package services.subscription.update
 
 import com.github.tomakehurst.wiremock.client.WireMock._
-import connectors.BaseConnector
 import connectors.subscription.update.SubscriptionUpdateConnector
 import play.api.http.Status._
 import services.BaseService.Responses.Error
@@ -171,44 +170,47 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
           verifyThatDownstreamApiWasCalled()
         }
       }
-      "fails, where the response body is" - {
-        "wrong, with a status code of service unavailable" in {
+      "fails, with a status code of" - {
+        "bad request" in {
           stubFor(
             post(urlEqualTo(s"$connectorPath/a7405c8d-06ee-46a3-b5a0-5d65176360ed"))
               .withRequestBody(equalToJson("""
-                  |{
-                  |    "name": "Harold Winter",
-                  |    "contacts": [
-                  |        {
-                  |            "type": "I",
-                  |            "firstName": "Patrick",
-                  |            "middleName": "John",
-                  |            "lastName": "Dyson",
-                  |            "landline": "747663966",
-                  |            "mobile": "38390756243",
-                  |            "emailAddress": "Patrick.Dyson@example.com"
-                  |        },
-                  |        {
-                  |            "type": "O",
-                  |            "name": "Dyson",
-                  |            "landline": "847663966",
-                  |            "mobile": "48390756243",
-                  |            "emailAddress": "info@example.com"
-                  |        }
-                  |    ]
-                  |}
-                  |""".stripMargin))
+                                               |{
+                                               |    "name": "Harold Winter",
+                                               |    "contacts": [
+                                               |        {
+                                               |            "type": "I",
+                                               |            "firstName": "",
+                                               |            "middleName": "John",
+                                               |            "lastName": "",
+                                               |            "landline": "747663966",
+                                               |            "mobile": "38390756243",
+                                               |            "emailAddress": "Patrick.Dyson@example.com"
+                                               |        },
+                                               |        {
+                                               |            "type": "O",
+                                               |            "name": "Dyson",
+                                               |            "landline": "847663966",
+                                               |            "mobile": "48390756243",
+                                               |            "emailAddress": "info@example.com"
+                                               |        }
+                                               |    ]
+                                               |}
+                                               |""".stripMargin))
               .willReturn(
                 aResponse()
                   .withHeader("Content-Type", "application/json")
-                  .withStatus(SERVICE_UNAVAILABLE)
+                  .withStatus(BAD_REQUEST)
                   .withBody("""
-                      |[
-                      |  {
-                      |    "codex": "eis-returned-service-unavailable"
-                      |  }
-                      |]
-                      |""".stripMargin)
+                                |[
+                                |  {
+                                |    "code": "invalid-first-name"
+                                |  },
+                                |  {
+                                |    "code": "invalid-last-name"
+                                |  }
+                                |]
+                                |""".stripMargin)
               )
           )
           val request = SubscriptionUpdateService.Requests.Request(
@@ -216,9 +218,9 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
             name = Some("Harold Winter"),
             contacts = Seq(
               SubscriptionService.Requests.Individual(
-                firstName = "Patrick",
+                firstName = "",
                 middleName = Some("John"),
-                lastName = "Dyson",
+                lastName = "",
                 landline = Some("747663966"),
                 mobile = Some("38390756243"),
                 emailAddress = "Patrick.Dyson@example.com"
@@ -231,72 +233,312 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
               )
             )
           )
-          assertThrows[BaseConnector.Exceptions.ResponseParsingException] {
-            await(service.call(request))
-          }
-          verifyThatDownstreamApiWasCalled()
-        }
-        "valid, with a status code of" - {
-          "internal server error" in {
-            stubFor(
-              post(urlEqualTo(s"$connectorPath/a7405c8d-06ee-46a3-b5a0-5d65176360ed"))
-                .withRequestBody(equalToJson("""
-                    |{
-                    |    "name": "Harold Winter",
-                    |    "contacts": [
-                    |        {
-                    |            "type": "I",
-                    |            "firstName": "",
-                    |            "middleName": "John",
-                    |            "lastName": "",
-                    |            "landline": "747663966",
-                    |            "mobile": "38390756243",
-                    |            "emailAddress": "Patrick.Dyson@example.com"
-                    |        },
-                    |        {
-                    |            "type": "O",
-                    |            "name": "Dyson",
-                    |            "landline": "847663966",
-                    |            "mobile": "48390756243",
-                    |            "emailAddress": "info@example.com"
-                    |        }
-                    |    ]
-                    |}
-                    |""".stripMargin))
-                .willReturn(
-                  aResponse()
-                    .withHeader("Content-Type", "application/json")
-                    .withStatus(INTERNAL_SERVER_ERROR)
-                )
-            )
-            val request = SubscriptionUpdateService.Requests.Request(
-              id = "a7405c8d-06ee-46a3-b5a0-5d65176360ed",
-              name = Some("Harold Winter"),
-              contacts = Seq(
-                SubscriptionService.Requests.Individual(
-                  firstName = "",
-                  middleName = Some("John"),
-                  lastName = "",
-                  landline = Some("747663966"),
-                  mobile = Some("38390756243"),
-                  emailAddress = "Patrick.Dyson@example.com"
-                ),
-                SubscriptionService.Requests.Organisation(
-                  name = "Dyson",
-                  landline = Some("847663966"),
-                  mobile = Some("48390756243"),
-                  emailAddress = "info@example.com"
-                )
+
+          val response = await(service.call(request))
+
+          response shouldBe Left(
+            BaseService.Responses.Errors(
+              BAD_REQUEST,
+              Seq(
+                Error("invalid-first-name"),
+                Error("invalid-last-name")
               )
             )
-            val response = await(service.call(request))
-            response shouldBe Left(BaseService.Responses.Errors(INTERNAL_SERVER_ERROR))
-            verifyThatDownstreamApiWasCalled()
-          }
-          "not found" in {
-            stubFor(
-              post(urlEqualTo(s"$connectorPath/a7405c8d-06ee-46a3-b5a0-5d65176360ed"))
-                .withRequestBody(equalToJson("""
+          )
+          verifyThatDownstreamApiWasCalled()
+        }
+        "service unavailable" in {
+          stubFor(
+            post(urlEqualTo(s"$connectorPath/a7405c8d-06ee-46a3-b5a0-5d65176360ed"))
+              .withRequestBody(equalToJson("""
+                                               |{
+                                               |    "name": "Harold Winter",
+                                               |    "contacts": [
+                                               |        {
+                                               |            "type": "I",
+                                               |            "firstName": "",
+                                               |            "middleName": "John",
+                                               |            "lastName": "",
+                                               |            "landline": "747663966",
+                                               |            "mobile": "38390756243",
+                                               |            "emailAddress": "Patrick.Dyson@example.com"
+                                               |        },
+                                               |        {
+                                               |            "type": "O",
+                                               |            "name": "Dyson",
+                                               |            "landline": "847663966",
+                                               |            "mobile": "48390756243",
+                                               |            "emailAddress": "info@example.com"
+                                               |        }
+                                               |    ]
+                                               |}
+                                               |""".stripMargin))
+              .willReturn(
+                aResponse()
+                  .withHeader("Content-Type", "application/json")
+                  .withStatus(SERVICE_UNAVAILABLE)
+                  .withBody("""
+                                |[
+                                |  {
+                                |    "code": "eis-returned-service-unavailable"
+                                |  }
+                                |]
+                                |""".stripMargin)
+              )
+          )
+          val request = SubscriptionUpdateService.Requests.Request(
+            id = "a7405c8d-06ee-46a3-b5a0-5d65176360ed",
+            name = Some("Harold Winter"),
+            contacts = Seq(
+              SubscriptionService.Requests.Individual(
+                firstName = "",
+                middleName = Some("John"),
+                lastName = "",
+                landline = Some("747663966"),
+                mobile = Some("38390756243"),
+                emailAddress = "Patrick.Dyson@example.com"
+              ),
+              SubscriptionService.Requests.Organisation(
+                name = "Dyson",
+                landline = Some("847663966"),
+                mobile = Some("48390756243"),
+                emailAddress = "info@example.com"
+              )
+            )
+          )
+
+          val response = await(service.call(request))
+
+          response shouldBe Left(
+            BaseService.Responses.Errors(
+              SERVICE_UNAVAILABLE,
+              Seq(
+                Error("eis-returned-service-unavailable")
+              )
+            )
+          )
+          verifyThatDownstreamApiWasCalled()
+        }
+        "conflict" in {
+          stubFor(
+            post(urlEqualTo(s"$connectorPath/a7405c8d-06ee-46a3-b5a0-5d65176360ed"))
+              .withRequestBody(equalToJson("""
+                                               |{
+                                               |    "name": "Harold Winter",
+                                               |    "contacts": [
+                                               |        {
+                                               |            "type": "I",
+                                               |            "firstName": "",
+                                               |            "middleName": "John",
+                                               |            "lastName": "",
+                                               |            "landline": "747663966",
+                                               |            "mobile": "38390756243",
+                                               |            "emailAddress": "Patrick.Dyson@example.com"
+                                               |        },
+                                               |        {
+                                               |            "type": "O",
+                                               |            "name": "Dyson",
+                                               |            "landline": "847663966",
+                                               |            "mobile": "48390756243",
+                                               |            "emailAddress": "info@example.com"
+                                               |        }
+                                               |    ]
+                                               |}
+                                               |""".stripMargin))
+              .willReturn(
+                aResponse()
+                  .withHeader("Content-Type", "application/json")
+                  .withStatus(CONFLICT)
+                  .withBody("""
+                                |[
+                                |  {
+                                |    "code": "eis-returned-conflict"
+                                |  }
+                                |]
+                                |""".stripMargin)
+              )
+          )
+          val request = SubscriptionUpdateService.Requests.Request(
+            id = "a7405c8d-06ee-46a3-b5a0-5d65176360ed",
+            name = Some("Harold Winter"),
+            contacts = Seq(
+              SubscriptionService.Requests.Individual(
+                firstName = "",
+                middleName = Some("John"),
+                lastName = "",
+                landline = Some("747663966"),
+                mobile = Some("38390756243"),
+                emailAddress = "Patrick.Dyson@example.com"
+              ),
+              SubscriptionService.Requests.Organisation(
+                name = "Dyson",
+                landline = Some("847663966"),
+                mobile = Some("48390756243"),
+                emailAddress = "info@example.com"
+              )
+            )
+          )
+
+          val response = await(service.call(request))
+
+          response shouldBe Left(
+            BaseService.Responses.Errors(
+              CONFLICT,
+              Seq(
+                Error("eis-returned-conflict")
+              )
+            )
+          )
+          verifyThatDownstreamApiWasCalled()
+        }
+        "forbidden" in {
+          stubFor(
+            post(urlEqualTo(s"$connectorPath/a7405c8d-06ee-46a3-b5a0-5d65176360ed"))
+              .withRequestBody(equalToJson("""
+                                               |{
+                                               |    "name": "Harold Winter",
+                                               |    "contacts": [
+                                               |        {
+                                               |            "type": "I",
+                                               |            "firstName": "",
+                                               |            "middleName": "John",
+                                               |            "lastName": "",
+                                               |            "landline": "747663966",
+                                               |            "mobile": "38390756243",
+                                               |            "emailAddress": "Patrick.Dyson@example.com"
+                                               |        },
+                                               |        {
+                                               |            "type": "O",
+                                               |            "name": "Dyson",
+                                               |            "landline": "847663966",
+                                               |            "mobile": "48390756243",
+                                               |            "emailAddress": "info@example.com"
+                                               |        }
+                                               |    ]
+                                               |}
+                                               |""".stripMargin))
+              .willReturn(
+                aResponse()
+                  .withHeader("Content-Type", "application/json")
+                  .withStatus(FORBIDDEN)
+                  .withBody("""
+                                |[
+                                |  {
+                                |    "code": "eis-returned-forbidden"
+                                |  }
+                                |]
+                                |""".stripMargin)
+              )
+          )
+          val request = SubscriptionUpdateService.Requests.Request(
+            id = "a7405c8d-06ee-46a3-b5a0-5d65176360ed",
+            name = Some("Harold Winter"),
+            contacts = Seq(
+              SubscriptionService.Requests.Individual(
+                firstName = "",
+                middleName = Some("John"),
+                lastName = "",
+                landline = Some("747663966"),
+                mobile = Some("38390756243"),
+                emailAddress = "Patrick.Dyson@example.com"
+              ),
+              SubscriptionService.Requests.Organisation(
+                name = "Dyson",
+                landline = Some("847663966"),
+                mobile = Some("48390756243"),
+                emailAddress = "info@example.com"
+              )
+            )
+          )
+
+          val response = await(service.call(request))
+
+          response shouldBe Left(
+            BaseService.Responses.Errors(
+              FORBIDDEN,
+              Seq(
+                Error("eis-returned-forbidden")
+              )
+            )
+          )
+          verifyThatDownstreamApiWasCalled()
+        }
+        "unauthorised" in {
+          stubFor(
+            post(urlEqualTo(s"$connectorPath/a7405c8d-06ee-46a3-b5a0-5d65176360ed"))
+              .withRequestBody(equalToJson("""
+                                               |{
+                                               |    "name": "Harold Winter",
+                                               |    "contacts": [
+                                               |        {
+                                               |            "type": "I",
+                                               |            "firstName": "",
+                                               |            "middleName": "John",
+                                               |            "lastName": "",
+                                               |            "landline": "747663966",
+                                               |            "mobile": "38390756243",
+                                               |            "emailAddress": "Patrick.Dyson@example.com"
+                                               |        },
+                                               |        {
+                                               |            "type": "O",
+                                               |            "name": "Dyson",
+                                               |            "landline": "847663966",
+                                               |            "mobile": "48390756243",
+                                               |            "emailAddress": "info@example.com"
+                                               |        }
+                                               |    ]
+                                               |}
+                                               |""".stripMargin))
+              .willReturn(
+                aResponse()
+                  .withHeader("Content-Type", "application/json")
+                  .withStatus(UNAUTHORIZED)
+                  .withBody("""
+                                |[
+                                |  {
+                                |    "code": "eis-returned-unauthorised"
+                                |  }
+                                |]
+                                |""".stripMargin)
+              )
+          )
+          val request = SubscriptionUpdateService.Requests.Request(
+            id = "a7405c8d-06ee-46a3-b5a0-5d65176360ed",
+            name = Some("Harold Winter"),
+            contacts = Seq(
+              SubscriptionService.Requests.Individual(
+                firstName = "",
+                middleName = Some("John"),
+                lastName = "",
+                landline = Some("747663966"),
+                mobile = Some("38390756243"),
+                emailAddress = "Patrick.Dyson@example.com"
+              ),
+              SubscriptionService.Requests.Organisation(
+                name = "Dyson",
+                landline = Some("847663966"),
+                mobile = Some("48390756243"),
+                emailAddress = "info@example.com"
+              )
+            )
+          )
+
+          val response = await(service.call(request))
+
+          response shouldBe Left(
+            BaseService.Responses.Errors(
+              UNAUTHORIZED,
+              Seq(
+                Error("eis-returned-unauthorised")
+              )
+            )
+          )
+          verifyThatDownstreamApiWasCalled()
+        }
+        "not found" in {
+          stubFor(
+            post(urlEqualTo(s"$connectorPath/a7405c8d-06ee-46a3-b5a0-5d65176360ed"))
+              .withRequestBody(equalToJson("""
                     |{
                     |    "name": "Harold Winter",
                     |    "contacts": [
@@ -319,226 +561,51 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
                     |    ]
                     |}
                     |""".stripMargin))
-                .willReturn(
-                  aResponse()
-                    .withHeader("Content-Type", "application/json")
-                    .withStatus(NOT_FOUND)
-                    .withBody("""
+              .willReturn(
+                aResponse()
+                  .withHeader("Content-Type", "application/json")
+                  .withStatus(NOT_FOUND)
+                  .withBody("""
                         |[
                         |  {
                         |    "code": "eis-returned-not-found"
                         |  }
                         |]
                         |""".stripMargin)
-                )
-            )
-            val request = SubscriptionUpdateService.Requests.Request(
-              id = "a7405c8d-06ee-46a3-b5a0-5d65176360ed",
-              name = Some("Harold Winter"),
-              contacts = Seq(
-                SubscriptionService.Requests.Individual(
-                  firstName = "",
-                  middleName = Some("John"),
-                  lastName = "",
-                  landline = Some("747663966"),
-                  mobile = Some("38390756243"),
-                  emailAddress = "Patrick.Dyson@example.com"
-                ),
-                SubscriptionService.Requests.Organisation(
-                  name = "Dyson",
-                  landline = Some("847663966"),
-                  mobile = Some("48390756243"),
-                  emailAddress = "info@example.com"
-                )
               )
-            )
-            val response = await(service.call(request))
-            response shouldBe Left(
-              BaseService.Responses.Errors(
-                NOT_FOUND,
-                Seq(
-                  Error("eis-returned-not-found")
-                )
-              )
-            )
-            verifyThatDownstreamApiWasCalled()
-          }
-        }
-        "invalid, with an error code of:" in {
-          val errorCodes = Seq(
-            "invalid-name",
-            "invalid-contact-1-type",
-            "invalid-contact-1-name",
-            "invalid-contact-1-first-name",
-            "invalid-contact-1-middle-name",
-            "invalid-contact-1-last-name",
-            "invalid-contact-1-landline",
-            "invalid-contact-1-mobile",
-            "invalid-contact-1-email-address",
-            "invalid-contact-2-type",
-            "invalid-contact-2-name",
-            "invalid-contact-2-first-name",
-            "invalid-contact-2-middle-name",
-            "invalid-contact-2-last-name",
-            "invalid-contact-2-landline",
-            "invalid-contact-2-mobile",
-            "invalid-contact-2-email-address"
           )
-          errorCodes.foreach { errorCode: String =>
-            info(s"$BAD_REQUEST -> $errorCode")
-            stubFor(
-              post(urlEqualTo(s"$connectorPath/a7405c8d-06ee-46a3-b5a0-5d65176360ed"))
-                .withRequestBody(equalToJson(
-                  """
-                    |{
-                    |    "name": "Harold Winter",
-                    |    "contacts": [
-                    |        {
-                    |            "type": "I",
-                    |            "firstName": "Patrick",
-                    |            "middleName": "John",
-                    |            "lastName": "Dyson",
-                    |            "landline": "747663966",
-                    |            "mobile": "38390756243",
-                    |            "emailAddress": "Patrick.Dyson@example.com"
-                    |        },
-                    |        {
-                    |            "type": "O",
-                    |            "name": "Dyson",
-                    |            "landline": "847663966",
-                    |            "mobile": "48390756243",
-                    |            "emailAddress": "info@example.com"
-                    |        }
-                    |    ]
-                    |}
-                    |""".stripMargin))
-                .willReturn(
-                  aResponse()
-                    .withHeader("Content-Type", "application/json")
-                    .withStatus(BAD_REQUEST)
-                    .withBody(
-                      s"""
-                         |[
-                         |  {
-                         |    "code": "$errorCode"
-                         |  }
-                         |]
-                         |""".stripMargin)
-                )
-            )
-            val request = SubscriptionUpdateService.Requests.Request(
-              id = "a7405c8d-06ee-46a3-b5a0-5d65176360ed",
-              name = Some("Harold Winter"),
-              contacts = Seq(
-                SubscriptionService.Requests.Individual(
-                  firstName = "Patrick",
-                  middleName = Some("John"),
-                  lastName = "Dyson",
-                  landline = Some("747663966"),
-                  mobile = Some("38390756243"),
-                  emailAddress = "Patrick.Dyson@example.com"
-                ),
-                SubscriptionService.Requests.Organisation(
-                  name = "Dyson",
-                  landline = Some("847663966"),
-                  mobile = Some("48390756243"),
-                  emailAddress = "info@example.com"
-                )
+          val request = SubscriptionUpdateService.Requests.Request(
+            id = "a7405c8d-06ee-46a3-b5a0-5d65176360ed",
+            name = Some("Harold Winter"),
+            contacts = Seq(
+              SubscriptionService.Requests.Individual(
+                firstName = "",
+                middleName = Some("John"),
+                lastName = "",
+                landline = Some("747663966"),
+                mobile = Some("38390756243"),
+                emailAddress = "Patrick.Dyson@example.com"
+              ),
+              SubscriptionService.Requests.Organisation(
+                name = "Dyson",
+                landline = Some("847663966"),
+                mobile = Some("48390756243"),
+                emailAddress = "info@example.com"
               )
             )
-            val response = await(service.call(request))
-            response shouldBe Left(
-              BaseService.Responses.Errors(
-                BAD_REQUEST,
-                Seq(
-                  Error(errorCode)
-                )
-              )
-            )
-            verifyThatDownstreamApiWasCalled()
-          }
-        }
-        "invalid, with a status code of:" in {
-          val statusCodes = Map[Int, String](
-            INTERNAL_SERVER_ERROR -> "eis-returned-internal-server-error",
-            SERVICE_UNAVAILABLE   -> "eis-returned-service-unavailable",
-            CONFLICT              -> "eis-returned-conflict",
-            UNAUTHORIZED          -> "eis-returned-unauthorized",
-            FORBIDDEN             -> "eis-returned-forbidden"
           )
-          statusCodes.keySet.foreach { statusCode: Int =>
-            val errorCode = statusCodes.getOrElse(statusCode, throw new NoSuchElementException)
-            info(s"$statusCode -> $errorCode")
-            stubFor(
-              post(urlEqualTo(s"$connectorPath/a7405c8d-06ee-46a3-b5a0-5d65176360ed"))
-                .withRequestBody(equalToJson(
-                  """
-                    |{
-                    |    "name": "Harold Winter",
-                    |    "contacts": [
-                    |        {
-                    |            "type": "I",
-                    |            "firstName": "Patrick",
-                    |            "middleName": "John",
-                    |            "lastName": "Dyson",
-                    |            "landline": "747663966",
-                    |            "mobile": "38390756243",
-                    |            "emailAddress": "Patrick.Dyson@example.com"
-                    |        },
-                    |        {
-                    |            "type": "O",
-                    |            "name": "Dyson",
-                    |            "landline": "847663966",
-                    |            "mobile": "48390756243",
-                    |            "emailAddress": "info@example.com"
-                    |        }
-                    |    ]
-                    |}
-                    |""".stripMargin))
-                .willReturn(
-                  aResponse()
-                    .withHeader("Content-Type", "application/json")
-                    .withStatus(statusCode)
-                    .withBody(s"""
-                        |[
-                        |  {
-                        |    "code": "$errorCode"
-                        |  }
-                        |]
-                        |""".stripMargin)
-                )
-            )
-            val request = SubscriptionUpdateService.Requests.Request(
-              id = "a7405c8d-06ee-46a3-b5a0-5d65176360ed",
-              name = Some("Harold Winter"),
-              contacts = Seq(
-                SubscriptionService.Requests.Individual(
-                  firstName = "Patrick",
-                  middleName = Some("John"),
-                  lastName = "Dyson",
-                  landline = Some("747663966"),
-                  mobile = Some("38390756243"),
-                  emailAddress = "Patrick.Dyson@example.com"
-                ),
-                SubscriptionService.Requests.Organisation(
-                  name = "Dyson",
-                  landline = Some("847663966"),
-                  mobile = Some("48390756243"),
-                  emailAddress = "info@example.com"
-                )
+
+          val response = await(service.call(request))
+
+          response shouldBe Left(
+            BaseService.Responses.Errors(
+              NOT_FOUND,
+              Seq(
+                Error("eis-returned-not-found")
               )
             )
-            val response = await(service.call(request))
-            response shouldBe Left(
-              BaseService.Responses.Errors(
-                statusCode,
-                Seq(
-                  Error(errorCode)
-                )
-              )
-            )
-            verifyThatDownstreamApiWasCalled()
-          }
+          )
+          verifyThatDownstreamApiWasCalled()
         }
       }
     }

@@ -49,7 +49,9 @@ class SubscriptionUpdateConverterSpec extends BaseSpec {
           )
         )
       )
+
       val connectorRequest = converter.convertServiceRequest(serviceRequest)
+
       connectorRequest shouldBe SubscriptionUpdateConnector.Requests.Request(
         id = "a7405c8d-06ee-46a3-b5a0-5d65176360ed",
         name = Some("Harold Winter"),
@@ -75,7 +77,9 @@ class SubscriptionUpdateConverterSpec extends BaseSpec {
     }
     "connector response" in {
       val connectorResponse = BaseConnector.Responses.EmptyResponse()
+
       val serviceResponse = converter.convertSuccessfulConnectorResponse(Some(connectorResponse))
+
       serviceResponse shouldBe None
     }
   }
