@@ -22,7 +22,7 @@ import connectors.subscription.update.SubscriptionUpdateConnector
 import connectors.subscription.update.SubscriptionUpdateConnector.{Requests => ConnectorRequests}
 import converters.subscription.update.SubscriptionUpdateConverter
 import services.BaseService
-import services.subscription.SubscriptionService.Requests.Contact
+import services.subscription.SubscriptionService.Data.Contact
 import services.subscription.update.SubscriptionUpdateService.{Requests => ServiceRequests}
 
 @Singleton

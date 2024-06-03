@@ -16,11 +16,23 @@
 
 package connectors.subscription
 
+import config.FrontendAppConfig
+import connectors.BaseBackendConnector
 import play.api.libs.functional.syntax.{toFunctionalBuilderOps, unlift}
-import play.api.libs.json.{JsPath, Json, OWrites}
+import play.api.libs.json.{JsError, JsPath, JsString, JsValue, Json, KeyPathNode, OWrites, Reads}
+import play.api.libs.ws.WSClient
+
+abstract class SubscriptionConnector[REQUEST, RESPONSE](frontendAppConfig: FrontendAppConfig, wsClient: WSClient)
+    extends BaseBackendConnector[REQUEST, RESPONSE](frontendAppConfig, wsClient) {
+
+  final override def connectorPath: String = SubscriptionConnector.connectorPath
+}
 
 object SubscriptionConnector {
-  object Requests {
+
+  val connectorPath: String = "/subscriptions"
+
+  object Data {
 
     sealed trait Contact {
       def typeCode: String
@@ -30,7 +42,18 @@ object SubscriptionConnector {
     }
 
     object Contact {
+      private val invalidTypeError               = JsError(JsPath(List(KeyPathNode("type"))), "error.invalid")
       implicit lazy val writes: OWrites[Contact] = Json.writes[Contact].transform(jsObject => jsObject - "_type")
+      implicit lazy val reads: Reads[Contact] = (json: JsValue) =>
+        (json \ "type").toOption
+          .map {
+            _.as[JsString].value.trim.toUpperCase match {
+              case "I" => json.validate[Individual]
+              case "O" => json.validate[Organisation]
+              case _   => invalidTypeError
+            }
+          }
+          .getOrElse(invalidTypeError)
     }
 
     final case class Individual(
@@ -52,6 +75,15 @@ object SubscriptionConnector {
           (JsPath \ "landline").writeNullable[String] and
           (JsPath \ "mobile").writeNullable[String] and
           (JsPath \ "emailAddress").write[String])(unlift(Individual.unapply))
+
+      implicit lazy val reads: Reads[Individual] =
+        ((JsPath \ "type").read[String] and
+          (JsPath \ "firstName").read[String] and
+          (JsPath \ "middleName").readNullable[String] and
+          (JsPath \ "lastName").read[String] and
+          (JsPath \ "landline").readNullable[String] and
+          (JsPath \ "mobile").readNullable[String] and
+          (JsPath \ "emailAddress").read[String])(Individual.apply _)
     }
 
     final case class Organisation(
@@ -70,5 +102,12 @@ object SubscriptionConnector {
           (JsPath \ "mobile").writeNullable[String] and
           (JsPath \ "emailAddress").write[String])(unlift(Organisation.unapply))
     }
+
+    implicit lazy val reads: Reads[Organisation] =
+      ((JsPath \ "type").read[String] and
+        (JsPath \ "name").read[String] and
+        (JsPath \ "landline").readNullable[String] and
+        (JsPath \ "mobile").readNullable[String] and
+        (JsPath \ "emailAddress").read[String])(Organisation.apply _)
   }
 }

@@ -16,9 +16,9 @@
 
 package converters.subscription
 
-import connectors.subscription.SubscriptionConnector.{Requests => ConnectorDataRequests}
+import connectors.subscription.SubscriptionConnector.{Data => ConnectorDataRequests}
 import converters.BaseConverter
-import services.subscription.SubscriptionService.{Requests => ServiceDataRequests}
+import services.subscription.SubscriptionService.{Data => ServiceDataRequests}
 
 abstract class SubscriptionConverter[SERVICE_REQUEST, CONNECTOR_REQUEST, CONNECTOR_RESPONSE, SERVICE_RESPONSE]
     extends BaseConverter[SERVICE_REQUEST, CONNECTOR_REQUEST, CONNECTOR_RESPONSE, SERVICE_RESPONSE] {

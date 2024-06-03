@@ -14,47 +14,34 @@
  * limitations under the License.
  */
 
-package converters.subscription.update
+package converters.subscription.read
 
 import base.BaseSpec
-import connectors.BaseConnector
 import connectors.subscription.SubscriptionConnector
-import connectors.subscription.update.SubscriptionUpdateConnector
+import connectors.subscription.read.SubscriptionReadConnector
 import services.subscription.SubscriptionService
-import services.subscription.update.SubscriptionUpdateService
+import services.subscription.read.SubscriptionReadService
 
-class SubscriptionUpdateConverterSpec extends BaseSpec {
+class SubscriptionReadConverterSpec extends BaseSpec {
 
-  private val converter = new SubscriptionUpdateConverter
+  private val converter = new SubscriptionReadConverter
 
   "when updating a subscription, the converter returns the expected value, for a" - {
     "service request" in {
-      val serviceRequest = SubscriptionUpdateService.Requests.Request(
-        id = "a7405c8d-06ee-46a3-b5a0-5d65176360ed",
-        name = Some("Harold Winter"),
-        contacts = Seq(
-          SubscriptionService.Data.Individual(
-            firstName = "Patrick",
-            middleName = Some("John"),
-            lastName = "Dyson",
-            landline = Some("747663966"),
-            mobile = Some("38390756243"),
-            emailAddress = "Patrick.Dyson@example.com"
-          ),
-          SubscriptionService.Data.Organisation(
-            name = "Dyson",
-            landline = Some("847663966"),
-            mobile = Some("48390756243"),
-            emailAddress = "info@example.com"
-          )
-        )
+      val serviceRequest = SubscriptionReadService.Requests.Request(
+        id = "a7405c8d-06ee-46a3-b5a0-5d65176360ed"
       )
 
       val connectorRequest = converter.convertServiceRequest(serviceRequest)
 
-      connectorRequest shouldBe SubscriptionUpdateConnector.Requests.Request(
+      connectorRequest shouldBe SubscriptionReadConnector.Requests.Request(
+        id = "a7405c8d-06ee-46a3-b5a0-5d65176360ed"
+      )
+    }
+    "connector response" in {
+      val connectorResponse = SubscriptionReadConnector.Responses.Response(
         id = "a7405c8d-06ee-46a3-b5a0-5d65176360ed",
-        name = Some("Harold Winter"),
+        name = "Harold Winter",
         contacts = Seq(
           SubscriptionConnector.Data.Individual(
             typeCode = "I",
@@ -74,13 +61,30 @@ class SubscriptionUpdateConverterSpec extends BaseSpec {
           )
         )
       )
-    }
-    "connector response" in {
-      val connectorResponse = BaseConnector.Responses.EmptyResponse()
 
       val serviceResponse = converter.convertSuccessfulConnectorResponse(Some(connectorResponse))
 
-      serviceResponse shouldBe None
+      serviceResponse shouldBe Some(
+        SubscriptionReadService.Responses.Response(
+          name = "Harold Winter",
+          contacts = Seq(
+            SubscriptionService.Data.Individual(
+              firstName = "Patrick",
+              middleName = Some("John"),
+              lastName = "Dyson",
+              landline = Some("747663966"),
+              mobile = Some("38390756243"),
+              emailAddress = "Patrick.Dyson@example.com"
+            ),
+            SubscriptionService.Data.Organisation(
+              name = "Dyson",
+              landline = Some("847663966"),
+              mobile = Some("48390756243"),
+              emailAddress = "info@example.com"
+            )
+          )
+        )
+      )
     }
   }
 }

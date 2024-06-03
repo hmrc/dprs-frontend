@@ -20,10 +20,10 @@ import connectors.BaseConnector
 import connectors.subscription.update.SubscriptionUpdateConnector.{Requests => ConnectorUpdateRequests}
 import converters.subscription.SubscriptionConverter
 import services.BaseService
-import services.subscription.update.SubscriptionUpdateService.{Requests => ServiceCreateRequests}
+import services.subscription.update.SubscriptionUpdateService.{Requests => ServiceUpdateRequests}
 
 class SubscriptionUpdateConverter
-    extends SubscriptionConverter[ServiceCreateRequests.Request,
+    extends SubscriptionConverter[ServiceUpdateRequests.Request,
                                   ConnectorUpdateRequests.Request,
                                   BaseConnector.Responses.EmptyResponse,
                                   BaseService.Responses.EmptyResponse
@@ -31,7 +31,7 @@ class SubscriptionUpdateConverter
 
   override def convertSuccessfulConnectorResponse(response: Option[BaseConnector.Responses.EmptyResponse]): Option[BaseService.Responses.EmptyResponse] = None
 
-  override def convertServiceRequest(request: ServiceCreateRequests.Request): ConnectorUpdateRequests.Request =
+  override def convertServiceRequest(request: ServiceUpdateRequests.Request): ConnectorUpdateRequests.Request =
     ConnectorUpdateRequests.Request(id = request.id, name = request.name, contacts = request.contacts.map(convert))
 
 }

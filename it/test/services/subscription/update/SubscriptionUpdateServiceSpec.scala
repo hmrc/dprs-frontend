@@ -17,6 +17,7 @@
 package services.subscription.update
 
 import com.github.tomakehurst.wiremock.client.WireMock._
+import connectors.subscription.SubscriptionConnector
 import connectors.subscription.update.SubscriptionUpdateConnector
 import play.api.http.Status._
 import services.BaseService.Responses.Error
@@ -25,7 +26,7 @@ import services.{BaseBackendConnectorSpec, BaseService}
 
 class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
 
-  private val connectorPath: String = SubscriptionUpdateConnector.connectorPath
+  private val connectorPath: String = SubscriptionConnector.connectorPath
   private lazy val service          = app.injector.instanceOf[SubscriptionUpdateService]
 
   "attempting to update a subscription, when" - {
@@ -67,7 +68,7 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
             id = "a7405c8d-06ee-46a3-b5a0-5d65176360ed",
             name = Some("Harold Winter"),
             contacts = Seq(
-              SubscriptionService.Requests.Individual(
+              SubscriptionService.Data.Individual(
                 firstName = "Patrick",
                 middleName = Some("John"),
                 lastName = "Dyson",
@@ -75,7 +76,7 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
                 mobile = Some("38390756243"),
                 emailAddress = "Patrick.Dyson@example.com"
               ),
-              SubscriptionService.Requests.Organisation(
+              SubscriptionService.Data.Organisation(
                 name = "Dyson",
                 landline = Some("847663966"),
                 mobile = Some("48390756243"),
@@ -116,7 +117,7 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
             id = "a7405c8d-06ee-46a3-b5a0-5d65176360ed",
             name = Some("Harold Winter"),
             contacts = Seq(
-              SubscriptionService.Requests.Individual(
+              SubscriptionService.Data.Individual(
                 firstName = "Patrick",
                 middleName = Some("John"),
                 lastName = "Dyson",
@@ -157,7 +158,7 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
             id = "a7405c8d-06ee-46a3-b5a0-5d65176360ed",
             name = Some("Harold Winter"),
             contacts = Seq(
-              SubscriptionService.Requests.Organisation(
+              SubscriptionService.Data.Organisation(
                 name = "Dyson",
                 landline = Some("847663966"),
                 mobile = Some("48390756243"),
@@ -217,7 +218,7 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
             id = "a7405c8d-06ee-46a3-b5a0-5d65176360ed",
             name = Some("Harold Winter"),
             contacts = Seq(
-              SubscriptionService.Requests.Individual(
+              SubscriptionService.Data.Individual(
                 firstName = "",
                 middleName = Some("John"),
                 lastName = "",
@@ -225,7 +226,7 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
                 mobile = Some("38390756243"),
                 emailAddress = "Patrick.Dyson@example.com"
               ),
-              SubscriptionService.Requests.Organisation(
+              SubscriptionService.Data.Organisation(
                 name = "Dyson",
                 landline = Some("847663966"),
                 mobile = Some("48390756243"),
@@ -290,7 +291,7 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
             id = "a7405c8d-06ee-46a3-b5a0-5d65176360ed",
             name = Some("Harold Winter"),
             contacts = Seq(
-              SubscriptionService.Requests.Individual(
+              SubscriptionService.Data.Individual(
                 firstName = "",
                 middleName = Some("John"),
                 lastName = "",
@@ -298,7 +299,7 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
                 mobile = Some("38390756243"),
                 emailAddress = "Patrick.Dyson@example.com"
               ),
-              SubscriptionService.Requests.Organisation(
+              SubscriptionService.Data.Organisation(
                 name = "Dyson",
                 landline = Some("847663966"),
                 mobile = Some("48390756243"),
@@ -362,7 +363,7 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
             id = "a7405c8d-06ee-46a3-b5a0-5d65176360ed",
             name = Some("Harold Winter"),
             contacts = Seq(
-              SubscriptionService.Requests.Individual(
+              SubscriptionService.Data.Individual(
                 firstName = "",
                 middleName = Some("John"),
                 lastName = "",
@@ -370,7 +371,7 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
                 mobile = Some("38390756243"),
                 emailAddress = "Patrick.Dyson@example.com"
               ),
-              SubscriptionService.Requests.Organisation(
+              SubscriptionService.Data.Organisation(
                 name = "Dyson",
                 landline = Some("847663966"),
                 mobile = Some("48390756243"),
@@ -434,7 +435,7 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
             id = "a7405c8d-06ee-46a3-b5a0-5d65176360ed",
             name = Some("Harold Winter"),
             contacts = Seq(
-              SubscriptionService.Requests.Individual(
+              SubscriptionService.Data.Individual(
                 firstName = "",
                 middleName = Some("John"),
                 lastName = "",
@@ -442,7 +443,7 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
                 mobile = Some("38390756243"),
                 emailAddress = "Patrick.Dyson@example.com"
               ),
-              SubscriptionService.Requests.Organisation(
+              SubscriptionService.Data.Organisation(
                 name = "Dyson",
                 landline = Some("847663966"),
                 mobile = Some("48390756243"),
@@ -506,7 +507,7 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
             id = "a7405c8d-06ee-46a3-b5a0-5d65176360ed",
             name = Some("Harold Winter"),
             contacts = Seq(
-              SubscriptionService.Requests.Individual(
+              SubscriptionService.Data.Individual(
                 firstName = "",
                 middleName = Some("John"),
                 lastName = "",
@@ -514,7 +515,7 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
                 mobile = Some("38390756243"),
                 emailAddress = "Patrick.Dyson@example.com"
               ),
-              SubscriptionService.Requests.Organisation(
+              SubscriptionService.Data.Organisation(
                 name = "Dyson",
                 landline = Some("847663966"),
                 mobile = Some("48390756243"),
@@ -578,7 +579,7 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
             id = "a7405c8d-06ee-46a3-b5a0-5d65176360ed",
             name = Some("Harold Winter"),
             contacts = Seq(
-              SubscriptionService.Requests.Individual(
+              SubscriptionService.Data.Individual(
                 firstName = "",
                 middleName = Some("John"),
                 lastName = "",
@@ -586,7 +587,7 @@ class SubscriptionUpdateServiceSpec extends BaseBackendConnectorSpec {
                 mobile = Some("38390756243"),
                 emailAddress = "Patrick.Dyson@example.com"
               ),
-              SubscriptionService.Requests.Organisation(
+              SubscriptionService.Data.Organisation(
                 name = "Dyson",
                 landline = Some("847663966"),
                 mobile = Some("48390756243"),

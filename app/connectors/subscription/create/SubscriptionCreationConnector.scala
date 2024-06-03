@@ -18,7 +18,8 @@ package connectors.subscription.create
 
 import com.google.inject.{Inject, Singleton}
 import config.FrontendAppConfig
-import connectors.subscription.SubscriptionConnector.Requests.Contact
+import connectors.subscription.SubscriptionConnector
+import connectors.subscription.SubscriptionConnector.Data.Contact
 import connectors.subscription.create.SubscriptionCreationConnector.Requests.Request
 import connectors.subscription.create.SubscriptionCreationConnector.Responses.Response
 import connectors.{BaseBackendConnector, BaseConnector}
@@ -30,9 +31,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class SubscriptionCreationConnector @Inject() (frontendAppConfig: FrontendAppConfig, wsClient: WSClient)
-    extends BaseBackendConnector[Request, Response](frontendAppConfig, wsClient) {
-
-  override def connectorPath: String = SubscriptionCreationConnector.connectorPath
+    extends SubscriptionConnector[Request, Response](frontendAppConfig, wsClient) {
 
   override def call(request: Request)(implicit
     executionContext: ExecutionContext
@@ -42,8 +41,6 @@ class SubscriptionCreationConnector @Inject() (frontendAppConfig: FrontendAppCon
 }
 
 object SubscriptionCreationConnector {
-
-  val connectorPath: String = "/subscriptions"
 
   object Requests {
 

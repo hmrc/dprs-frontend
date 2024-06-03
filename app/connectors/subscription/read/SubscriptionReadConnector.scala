@@ -14,44 +14,51 @@
  * limitations under the License.
  */
 
-package connectors.subscription.update
+package connectors.subscription.read
 
 import com.google.inject.Inject
 import config.FrontendAppConfig
 import connectors.subscription.SubscriptionConnector
 import connectors.subscription.SubscriptionConnector.Data.Contact
-import connectors.subscription.update.SubscriptionUpdateConnector.Requests.Request
+import connectors.subscription.read.SubscriptionReadConnector.Responses.Response
+import connectors.subscription.read.SubscriptionReadConnector.Requests.Request
 import connectors.{BaseBackendConnector, BaseConnector}
 import play.api.libs.functional.syntax.toFunctionalBuilderOps
-import play.api.libs.json.{JsPath, OWrites}
+import play.api.libs.json.{JsPath, Reads}
 import play.api.libs.ws.WSClient
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class SubscriptionUpdateConnector @Inject() (frontendAppConfig: FrontendAppConfig, wsClient: WSClient)
-    extends SubscriptionConnector[Request, BaseConnector.Responses.EmptyResponse](frontendAppConfig, wsClient) {
+class SubscriptionReadConnector @Inject() (frontendAppConfig: FrontendAppConfig, wsClient: WSClient)
+    extends SubscriptionConnector[Request, Response](frontendAppConfig, wsClient) {
 
   override def call(request: Request)(implicit
     executionContext: ExecutionContext
-  ): Future[Either[BaseConnector.Responses.Errors, Option[BaseConnector.Responses.EmptyResponse]]] =
-    post(baseUrl().append(request.id), request)
+  ): Future[Either[BaseConnector.Responses.Errors, Option[Response]]] =
+    get(baseUrl().append(request.id))
 }
 
-object SubscriptionUpdateConnector {
+object SubscriptionReadConnector {
 
   object Requests {
 
-    final case class Request(
+    final case class Request(id: String)
+
+  }
+
+  object Responses {
+
+    final case class Response(
       id: String,
-      name: Option[String],
+      name: String,
       contacts: Seq[Contact]
     )
 
-    object Request {
-      implicit lazy val writes: OWrites[Request] =
-        ((JsPath \ "name").writeNullable[String] and
-          (JsPath \ "contacts").write[Seq[Contact]])(r => (r.name, r.contacts))
+    object Response {
+      implicit lazy val reads: Reads[Response] =
+        ((JsPath \ "id").read[String] and
+          (JsPath \ "name").read[String] and
+          (JsPath \ "contacts").read[Seq[Contact]])(Response.apply _)
     }
   }
-
 }
