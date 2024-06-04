@@ -16,13 +16,10 @@
 
 package converters.subscription.read
 
-import connectors.BaseConnector
-import connectors.subscription.SubscriptionConnector.{Data => ConnectorDataRequests}
-import connectors.subscription.read
+import connectors.subscription.SubscriptionConnector.{RequestOrResponse => ConnectorDataRequests}
 import connectors.subscription.read.SubscriptionReadConnector
 import converters.subscription.SubscriptionConverter
-import services.BaseService
-import services.subscription.SubscriptionService.{Data => ServiceDataRequests}
+import services.subscription.SubscriptionService.{RequestOrResponse => ServiceDataRequests}
 import services.subscription.read.SubscriptionReadService
 
 class SubscriptionReadConverter

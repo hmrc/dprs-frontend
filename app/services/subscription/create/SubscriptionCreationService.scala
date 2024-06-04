@@ -21,7 +21,7 @@ import connectors.subscription.create.SubscriptionCreationConnector
 import connectors.subscription.create.SubscriptionCreationConnector.{Requests => ConnectorRequests, Responses => ConnectorResponses}
 import converters.subscription.create.SubscriptionCreationConverter
 import services.BaseService
-import services.subscription.SubscriptionService.Data.Contact
+import services.subscription.SubscriptionService.RequestOrResponse.Contact
 import services.subscription.create.SubscriptionCreationService.{Requests => ServiceRequests, Responses => ServiceResponses}
 
 @Singleton

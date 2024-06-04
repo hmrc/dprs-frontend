@@ -43,7 +43,7 @@ class SubscriptionReadConverterSpec extends BaseSpec {
         id = "a7405c8d-06ee-46a3-b5a0-5d65176360ed",
         name = "Harold Winter",
         contacts = Seq(
-          SubscriptionConnector.Data.Individual(
+          SubscriptionConnector.RequestOrResponse.Individual(
             typeCode = "I",
             firstName = "Patrick",
             middleName = Some("John"),
@@ -52,7 +52,7 @@ class SubscriptionReadConverterSpec extends BaseSpec {
             mobile = Some("38390756243"),
             emailAddress = "Patrick.Dyson@example.com"
           ),
-          SubscriptionConnector.Data.Organisation(
+          SubscriptionConnector.RequestOrResponse.Organisation(
             typeCode = "O",
             name = "Dyson",
             landline = Some("847663966"),
@@ -68,7 +68,7 @@ class SubscriptionReadConverterSpec extends BaseSpec {
         SubscriptionReadService.Responses.Response(
           name = "Harold Winter",
           contacts = Seq(
-            SubscriptionService.Data.Individual(
+            SubscriptionService.RequestOrResponse.Individual(
               firstName = "Patrick",
               middleName = Some("John"),
               lastName = "Dyson",
@@ -76,7 +76,7 @@ class SubscriptionReadConverterSpec extends BaseSpec {
               mobile = Some("38390756243"),
               emailAddress = "Patrick.Dyson@example.com"
             ),
-            SubscriptionService.Data.Organisation(
+            SubscriptionService.RequestOrResponse.Organisation(
               name = "Dyson",
               landline = Some("847663966"),
               mobile = Some("48390756243"),

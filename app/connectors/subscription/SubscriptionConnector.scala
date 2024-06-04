@@ -19,7 +19,7 @@ package connectors.subscription
 import config.FrontendAppConfig
 import connectors.BaseBackendConnector
 import play.api.libs.functional.syntax.{toFunctionalBuilderOps, unlift}
-import play.api.libs.json.{JsError, JsPath, JsString, JsValue, Json, KeyPathNode, OWrites, Reads}
+import play.api.libs.json._
 import play.api.libs.ws.WSClient
 
 abstract class SubscriptionConnector[REQUEST, RESPONSE](frontendAppConfig: FrontendAppConfig, wsClient: WSClient)
@@ -32,7 +32,7 @@ object SubscriptionConnector {
 
   val connectorPath: String = "/subscriptions"
 
-  object Data {
+  object RequestOrResponse {
 
     sealed trait Contact {
       def typeCode: String

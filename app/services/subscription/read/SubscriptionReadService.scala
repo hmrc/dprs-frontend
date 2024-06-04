@@ -21,7 +21,7 @@ import connectors.subscription.read.SubscriptionReadConnector
 import connectors.subscription.read.SubscriptionReadConnector.{Requests => ConnectorRequest, Responses => ConnectorResponse}
 import converters.subscription.read.SubscriptionReadConverter
 import services.BaseService
-import services.subscription.SubscriptionService.Data.Contact
+import services.subscription.SubscriptionService.RequestOrResponse.Contact
 import services.subscription.read.SubscriptionReadService.{Requests => ServiceRequest, Responses => ServiceResponse}
 
 class SubscriptionReadService @Inject() (connector: SubscriptionReadConnector, converter: SubscriptionReadConverter)

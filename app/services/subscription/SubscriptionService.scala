@@ -18,7 +18,7 @@ package services.subscription
 
 object SubscriptionService {
 
-  object Data {
+  object RequestOrResponse {
 
     sealed trait Contact {
       def landline: Option[String]

@@ -18,10 +18,10 @@ package connectors.subscription.update
 
 import com.google.inject.Inject
 import config.FrontendAppConfig
+import connectors.BaseConnector
 import connectors.subscription.SubscriptionConnector
-import connectors.subscription.SubscriptionConnector.Data.Contact
+import connectors.subscription.SubscriptionConnector.RequestOrResponse.Contact
 import connectors.subscription.update.SubscriptionUpdateConnector.Requests.Request
-import connectors.{BaseBackendConnector, BaseConnector}
 import play.api.libs.functional.syntax.toFunctionalBuilderOps
 import play.api.libs.json.{JsPath, OWrites}
 import play.api.libs.ws.WSClient
