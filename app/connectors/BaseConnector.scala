@@ -78,20 +78,29 @@ abstract class BaseConnector[REQUEST, RESPONSE](wsClient: WSClient) {
   private def asResponse(wsResponse: WSResponse)(implicit reads: Reads[RESPONSE]): Try[Either[Errors, Option[RESPONSE]]] =
     wsResponse.status match {
       case NO_CONTENT => Success(Right(None))
-      case _ =>
-        wsResponse.json
-          .validate[RESPONSE]
-          .map(response => Success(Right(Some(response))))
-          .getOrElse(Failure(new ResponseParsingException()))
+      case _          => Try(
+          wsResponse.json
+            .validate[RESPONSE]
+            .map(response => Success(Right(Some(response))))
+            .get
+        ) match {
+          case Success(result) => result
+          case Failure(_)      => Failure(new ResponseParsingException())
+        }
     }
 
   private def asErrors(statusCode: Int, wsResponse: WSResponse): Try[Either[Errors, Option[RESPONSE]]] =
-    if (wsResponse.body.nonEmpty)
-      wsResponse.json
-        .validate[Seq[BaseConnector.Responses.Error]]
-        .map(errors => Success(Left(Errors(statusCode, errors))))
-        .getOrElse(Failure(new ResponseParsingException()))
-    else Success(Left(Errors(statusCode)))
+    if (wsResponse.body.nonEmpty) {
+      Try(
+        wsResponse.json
+          .validate[Seq[BaseConnector.Responses.Error]]
+          .map(errors => Success(Left(Errors(statusCode, errors))))
+          .get
+      ) match {
+        case Success(result) => result
+        case Failure(_)      => Failure(new ResponseParsingException())
+      }
+    } else Success(Left(Errors(statusCode)))
 
   implicit class UrlHelper(url: URL) {
     def append(id: String) =

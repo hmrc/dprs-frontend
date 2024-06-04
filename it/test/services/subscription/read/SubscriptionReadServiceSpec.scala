@@ -263,69 +263,117 @@ class SubscriptionReadServiceSpec extends BaseBackendConnectorSpec {
         }
       }
       "fails, with an invalid response body for a status of" - {
-        "OK" in {
-          stubFor(
-            get(urlEqualTo(s"$connectorPath/a7405c8d-06ee-46a3-b5a0-5d65176360ed"))
-              .willReturn(
-                aResponse()
-                  .withHeader("Content-Type", "application/json")
-                  .withStatus(OK)
-                  .withBody("""
-                              |{
-                              |    "name": "Harold Winter",
-                              |    "contacts": [
-                              |        {
-                              |            "type": "I",
-                              |            "firstName": "Patrick",
-                              |            "middleName": "John",
-                              |            "lastName": "Dyson",
-                              |            "landline": "747663966",
-                              |            "mobile": "38390756243",
-                              |            "emailAddress": "Patrick.Dyson@example.com"
-                              |        },
-                              |        {
-                              |            "type": "O",
-                              |            "name": "Dyson",
-                              |            "landline": "847663966",
-                              |            "mobile": "48390756243",
-                              |            "emailAddress": "info@example.com"
-                              |        }
-                              |    ]
-                              |}
-                              |""".stripMargin)
-              )
-          )
-          val request = SubscriptionReadService.Requests.Request(
-            id = "a7405c8d-06ee-46a3-b5a0-5d65176360ed",
-          )
-          assertThrows[ResponseParsingException] {
-            await(service.call(request))
+        "OK with" - {
+          "unexpected JSON" in {
+            stubFor(
+              get(urlEqualTo(s"$connectorPath/a7405c8d-06ee-46a3-b5a0-5d65176360ed"))
+                .willReturn(
+                  aResponse()
+                    .withHeader("Content-Type", "application/json")
+                    .withStatus(OK)
+                    .withBody(
+                      """
+                        |{
+                        |    "name": "Harold Winter",
+                        |    "contacts": [
+                        |        {
+                        |            "type": "I",
+                        |            "firstName": "Patrick",
+                        |            "middleName": "John",
+                        |            "lastName": "Dyson",
+                        |            "landline": "747663966",
+                        |            "mobile": "38390756243",
+                        |            "emailAddress": "Patrick.Dyson@example.com"
+                        |        },
+                        |        {
+                        |            "type": "O",
+                        |            "name": "Dyson",
+                        |            "landline": "847663966",
+                        |            "mobile": "48390756243",
+                        |            "emailAddress": "info@example.com"
+                        |        }
+                        |    ]
+                        |}
+                        |""".stripMargin)
+                )
+            )
+            val request = SubscriptionReadService.Requests.Request(
+              id = "a7405c8d-06ee-46a3-b5a0-5d65176360ed",
+            )
+            assertThrows[ResponseParsingException] {
+              await(service.call(request))
+            }
+            verifyThatDownstreamApiWasCalled()
           }
-          verifyThatDownstreamApiWasCalled()
+          "invalid JSON" in {
+            stubFor(
+              get(urlEqualTo(s"$connectorPath/a7405c8d-06ee-46a3-b5a0-5d65176360ed"))
+                .willReturn(
+                  aResponse()
+                    .withHeader("Content-Type", "application/json")
+                    .withStatus(OK)
+                    .withBody(
+                      """
+                        |{
+                        |""".stripMargin)
+                )
+            )
+            val request = SubscriptionReadService.Requests.Request(
+              id = "a7405c8d-06ee-46a3-b5a0-5d65176360ed",
+            )
+            assertThrows[ResponseParsingException] {
+              await(service.call(request))
+            }
+            verifyThatDownstreamApiWasCalled()
+          }
         }
-        "error" in {
-          stubFor(
-            get(urlEqualTo(s"$connectorPath/a7405c8d-06ee-46a3-b5a0-5d65176360ed"))
-              .willReturn(
-                aResponse()
-                  .withHeader("Content-Type", "application/json")
-                  .withStatus(NOT_FOUND)
-                  .withBody("""
-                              |[
-                              |  {
-                              |    "xcode": "eis-returned-not-found"
-                              |  }
-                              |]
-                              |""".stripMargin)
-              )
-          )
-          val request = SubscriptionReadService.Requests.Request(
-            id = "a7405c8d-06ee-46a3-b5a0-5d65176360ed",
-          )
-          assertThrows[ResponseParsingException] {
-            await(service.call(request))
+        "error with" - {
+          "unexpected JSON" in {
+            stubFor(
+              get(urlEqualTo(s"$connectorPath/a7405c8d-06ee-46a3-b5a0-5d65176360ed"))
+                .willReturn(
+                  aResponse()
+                    .withHeader("Content-Type", "application/json")
+                    .withStatus(NOT_FOUND)
+                    .withBody(
+                      """
+                        |[
+                        |  {
+                        |    "xcode": "eis-returned-not-found"
+                        |  }
+                        |]
+                        |""".stripMargin)
+                )
+            )
+            val request = SubscriptionReadService.Requests.Request(
+              id = "a7405c8d-06ee-46a3-b5a0-5d65176360ed",
+            )
+            assertThrows[ResponseParsingException] {
+              await(service.call(request))
+            }
+            verifyThatDownstreamApiWasCalled()
           }
-          verifyThatDownstreamApiWasCalled()
+          "invalid JSON" in {
+            stubFor(
+              get(urlEqualTo(s"$connectorPath/a7405c8d-06ee-46a3-b5a0-5d65176360ed"))
+                .willReturn(
+                  aResponse()
+                    .withHeader("Content-Type", "application/json")
+                    .withStatus(NOT_FOUND)
+                    .withBody(
+                      """
+                        |[
+                        |""".stripMargin)
+                )
+            )
+            val request = SubscriptionReadService.Requests.Request(
+              id = "a7405c8d-06ee-46a3-b5a0-5d65176360ed",
+            )
+            assertThrows[ResponseParsingException] {
+              await(service.call(request))
+            }
+            verifyThatDownstreamApiWasCalled()
+          }
         }
       }
     }
