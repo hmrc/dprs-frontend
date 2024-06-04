@@ -50,7 +50,11 @@ class SubscriptionCreationConverterSpec extends BaseSpec {
               mobile = Some("38390756243"),
               emailAddress = "Patrick.Dyson@example.com"
             ),
-            SubscriptionService.RequestOrResponse.Organisation(name = "Dyson", landline = Some("847663966"), mobile = Some("48390756243"), emailAddress = "info@example.com")
+            SubscriptionService.RequestOrResponse.Organisation(name = "Dyson",
+                                                               landline = Some("847663966"),
+                                                               mobile = Some("48390756243"),
+                                                               emailAddress = "info@example.com"
+            )
           )
         )
 
@@ -70,10 +74,10 @@ class SubscriptionCreationConverterSpec extends BaseSpec {
               emailAddress = "Patrick.Dyson@example.com"
             ),
             SubscriptionConnector.RequestOrResponse.Organisation(typeCode = "O",
-                                                    name = "Dyson",
-                                                    landline = Some("847663966"),
-                                                    mobile = Some("48390756243"),
-                                                    emailAddress = "info@example.com"
+                                                                 name = "Dyson",
+                                                                 landline = Some("847663966"),
+                                                                 mobile = Some("48390756243"),
+                                                                 emailAddress = "info@example.com"
             )
           )
         )

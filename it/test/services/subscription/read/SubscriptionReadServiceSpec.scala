@@ -162,7 +162,7 @@ class SubscriptionReadServiceSpec extends BaseBackendConnectorSpec {
                       """
                         |[
                         |  {
-                        |    "code": "eis-returned-service-unavailable"
+                        |    "code": "eis-returned-internal-server-error"
                         |  }
                         |]
                         |""".stripMargin)
@@ -176,7 +176,7 @@ class SubscriptionReadServiceSpec extends BaseBackendConnectorSpec {
               BaseService.Responses.Errors(
                 SERVICE_UNAVAILABLE,
                 Seq(
-                  Error("eis-returned-service-unavailable")
+                  Error("eis-returned-internal-server-error")
                 )
               )
             )

@@ -16,10 +16,10 @@
 
 package converters.subscription.read
 
-import connectors.subscription.SubscriptionConnector.{RequestOrResponse => ConnectorDataRequests}
+import connectors.subscription.SubscriptionConnector.{RequestOrResponse => ConnectorRequests}
 import connectors.subscription.read.SubscriptionReadConnector
 import converters.subscription.SubscriptionConverter
-import services.subscription.SubscriptionService.{RequestOrResponse => ServiceDataRequests}
+import services.subscription.SubscriptionService.{RequestOrResponse => ServiceRequests}
 import services.subscription.read.SubscriptionReadService
 
 class SubscriptionReadConverter
@@ -42,12 +42,12 @@ class SubscriptionReadConverter
   override def convertServiceRequest(request: SubscriptionReadService.Requests.Request): SubscriptionReadConnector.Requests.Request =
     SubscriptionReadConnector.Requests.Request(request.id)
 
-  private def convert(contact: ConnectorDataRequests.Contact): ServiceDataRequests.Contact =
+  private def convert(contact: ConnectorRequests.Contact): ServiceRequests.Contact =
     contact match {
-      case ConnectorDataRequests.Individual("I", firstName, middleName, lastName, landline, mobile, emailAddress) =>
-        ServiceDataRequests.Individual(firstName, middleName, lastName, landline, mobile, emailAddress)
-      case ConnectorDataRequests.Organisation("O", name, landline, mobile, emailAddress) =>
-        ServiceDataRequests.Organisation(name, landline, mobile, emailAddress)
+      case ConnectorRequests.Individual("I", firstName, middleName, lastName, landline, mobile, emailAddress) =>
+        ServiceRequests.Individual(firstName, middleName, lastName, landline, mobile, emailAddress)
+      case ConnectorRequests.Organisation("O", name, landline, mobile, emailAddress) =>
+        ServiceRequests.Organisation(name, landline, mobile, emailAddress)
     }
 
 }

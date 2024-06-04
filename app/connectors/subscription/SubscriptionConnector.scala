@@ -101,13 +101,13 @@ object SubscriptionConnector {
           (JsPath \ "landline").writeNullable[String] and
           (JsPath \ "mobile").writeNullable[String] and
           (JsPath \ "emailAddress").write[String])(unlift(Organisation.unapply))
-    }
 
-    implicit lazy val reads: Reads[Organisation] =
-      ((JsPath \ "type").read[String] and
-        (JsPath \ "name").read[String] and
-        (JsPath \ "landline").readNullable[String] and
-        (JsPath \ "mobile").readNullable[String] and
-        (JsPath \ "emailAddress").read[String])(Organisation.apply _)
+      implicit lazy val reads: Reads[Organisation] =
+        ((JsPath \ "type").read[String] and
+          (JsPath \ "name").read[String] and
+          (JsPath \ "landline").readNullable[String] and
+          (JsPath \ "mobile").readNullable[String] and
+          (JsPath \ "emailAddress").read[String])(Organisation.apply _)
+    }
   }
 }
