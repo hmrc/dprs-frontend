@@ -42,7 +42,7 @@ class SubscriptionCreationConverterSpec extends BaseSpec {
           id = ServiceRequests.Id(idType, "AA000000A"),
           name = Some("Harold Winter"),
           contacts = Seq(
-            SubscriptionService.Requests.Individual(
+            SubscriptionService.RequestOrResponse.Individual(
               firstName = "Patrick",
               middleName = Some("John"),
               lastName = "Dyson",
@@ -50,10 +50,10 @@ class SubscriptionCreationConverterSpec extends BaseSpec {
               mobile = Some("38390756243"),
               emailAddress = "Patrick.Dyson@example.com"
             ),
-            SubscriptionService.Requests.Organisation(name = "Dyson",
-                                                      landline = Some("847663966"),
-                                                      mobile = Some("48390756243"),
-                                                      emailAddress = "info@example.com"
+            SubscriptionService.RequestOrResponse.Organisation(name = "Dyson",
+                                                               landline = Some("847663966"),
+                                                               mobile = Some("48390756243"),
+                                                               emailAddress = "info@example.com"
             )
           )
         )
@@ -64,7 +64,7 @@ class SubscriptionCreationConverterSpec extends BaseSpec {
           id = SubscriptionCreationConnector.Requests.Id(expectedRawType, "AA000000A"),
           name = Some("Harold Winter"),
           contacts = Seq(
-            SubscriptionConnector.Requests.Individual(
+            SubscriptionConnector.RequestOrResponse.Individual(
               typeCode = "I",
               firstName = "Patrick",
               middleName = Some("John"),
@@ -73,11 +73,11 @@ class SubscriptionCreationConverterSpec extends BaseSpec {
               mobile = Some("38390756243"),
               emailAddress = "Patrick.Dyson@example.com"
             ),
-            SubscriptionConnector.Requests.Organisation(typeCode = "O",
-                                                        name = "Dyson",
-                                                        landline = Some("847663966"),
-                                                        mobile = Some("48390756243"),
-                                                        emailAddress = "info@example.com"
+            SubscriptionConnector.RequestOrResponse.Organisation(typeCode = "O",
+                                                                 name = "Dyson",
+                                                                 landline = Some("847663966"),
+                                                                 mobile = Some("48390756243"),
+                                                                 emailAddress = "info@example.com"
             )
           )
         )

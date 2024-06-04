@@ -14,62 +14,51 @@
  * limitations under the License.
  */
 
-package connectors.subscription.create
+package connectors.subscription.read
 
-import com.google.inject.{Inject, Singleton}
+import com.google.inject.Inject
 import config.FrontendAppConfig
 import connectors.BaseConnector
 import connectors.subscription.SubscriptionConnector
 import connectors.subscription.SubscriptionConnector.RequestOrResponse.Contact
-import connectors.subscription.create.SubscriptionCreationConnector.Requests.Request
-import connectors.subscription.create.SubscriptionCreationConnector.Responses.Response
-import play.api.libs.functional.syntax.{toFunctionalBuilderOps, unlift}
-import play.api.libs.json.{JsPath, OWrites, Reads}
+import connectors.subscription.read.SubscriptionReadConnector.Requests.Request
+import connectors.subscription.read.SubscriptionReadConnector.Responses.Response
+import play.api.libs.functional.syntax.toFunctionalBuilderOps
+import play.api.libs.json.{JsPath, Reads}
 import play.api.libs.ws.WSClient
 
 import scala.concurrent.{ExecutionContext, Future}
 
-@Singleton
-class SubscriptionCreationConnector @Inject() (frontendAppConfig: FrontendAppConfig, wsClient: WSClient)
+class SubscriptionReadConnector @Inject() (frontendAppConfig: FrontendAppConfig, wsClient: WSClient)
     extends SubscriptionConnector[Request, Response](frontendAppConfig, wsClient) {
 
   override def call(request: Request)(implicit
     executionContext: ExecutionContext
   ): Future[Either[BaseConnector.Responses.Errors, Option[Response]]] =
-    post(request)
-
+    get(baseUrl().append(request.id))
 }
 
-object SubscriptionCreationConnector {
+object SubscriptionReadConnector {
 
   object Requests {
 
-    final case class Request(id: Id, name: Option[String], contacts: Seq[Contact])
+    final case class Request(id: String)
 
-    object Request {
-      implicit lazy val writes: OWrites[Request] =
-        ((JsPath \ "id").write[Id] and
-          (JsPath \ "name").writeNullable[String] and
-          (JsPath \ "contacts").write[Seq[Contact]])(unlift(Request.unapply))
-    }
-
-    final case class Id(idType: String, value: String)
-
-    object Id {
-      implicit lazy val writes: OWrites[Id] =
-        ((JsPath \ "type").write[String] and
-          (JsPath \ "value").write[String])(unlift(Id.unapply))
-    }
   }
 
   object Responses {
 
-    final case class Response(id: String)
+    final case class Response(
+      id: String,
+      name: String,
+      contacts: Seq[Contact]
+    )
 
     object Response {
       implicit lazy val reads: Reads[Response] =
-        (JsPath \ "id").read[String].map(Response(_))
-
+        ((JsPath \ "id").read[String] and
+          (JsPath \ "name").read[String] and
+          (JsPath \ "contacts").read[Seq[Contact]])(Response.apply _)
     }
   }
 }

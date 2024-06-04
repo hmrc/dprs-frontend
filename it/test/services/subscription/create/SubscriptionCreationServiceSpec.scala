@@ -18,7 +18,7 @@ package services.subscription.create
 
 import com.github.tomakehurst.wiremock.client.WireMock._
 import connectors.BaseConnector
-import connectors.subscription.create.SubscriptionCreationConnector
+import connectors.subscription.SubscriptionConnector
 import play.api.http.Status._
 import services.BaseService.Responses.Error
 import services.subscription.SubscriptionService
@@ -27,7 +27,7 @@ import services.{BaseBackendConnectorSpec, BaseService}
 
 class SubscriptionCreationServiceSpec extends BaseBackendConnectorSpec {
 
-  private val connectorPath: String = SubscriptionCreationConnector.connectorPath
+  private val connectorPath: String = SubscriptionConnector.connectorPath
   private lazy val service          = app.injector.instanceOf[SubscriptionCreationService]
 
   "attempting to create a subscription, when" - {
@@ -79,7 +79,7 @@ class SubscriptionCreationServiceSpec extends BaseBackendConnectorSpec {
             id = SubscriptionCreationService.Requests.Id(SubscriptionCreationService.Requests.IdType.NINO, "AA000000A"),
             name = Some("Harold Winter"),
             contacts = Seq(
-              SubscriptionService.Requests.Individual(
+              SubscriptionService.RequestOrResponse.Individual(
                 firstName = "Patrick",
                 middleName = Some("John"),
                 lastName = "Dyson",
@@ -87,7 +87,7 @@ class SubscriptionCreationServiceSpec extends BaseBackendConnectorSpec {
                 mobile = Some("38390756243"),
                 emailAddress = "Patrick.Dyson@example.com"
               ),
-              SubscriptionService.Requests.Organisation(name = "Dyson",
+              SubscriptionService.RequestOrResponse.Organisation(name = "Dyson",
                                                         landline = Some("847663966"),
                                                         mobile = Some("48390756243"),
                                                         emailAddress = "info@example.com"
@@ -139,7 +139,7 @@ class SubscriptionCreationServiceSpec extends BaseBackendConnectorSpec {
             id = SubscriptionCreationService.Requests.Id(SubscriptionCreationService.Requests.IdType.NINO, "AA000000A"),
             name = Some("Harold Winter"),
             contacts = Seq(
-              SubscriptionService.Requests.Individual(
+              SubscriptionService.RequestOrResponse.Individual(
                 firstName = "Patrick",
                 middleName = Some("John"),
                 lastName = "Dyson",
@@ -192,7 +192,7 @@ class SubscriptionCreationServiceSpec extends BaseBackendConnectorSpec {
             id = SubscriptionCreationService.Requests.Id(SubscriptionCreationService.Requests.IdType.NINO, "AA000000A"),
             name = Some("Harold Winter"),
             contacts = Seq(
-              SubscriptionService.Requests.Organisation(name = "Dyson",
+              SubscriptionService.RequestOrResponse.Organisation(name = "Dyson",
                                                         landline = Some("847663966"),
                                                         mobile = Some("48390756243"),
                                                         emailAddress = "info@example.com"
@@ -249,7 +249,7 @@ class SubscriptionCreationServiceSpec extends BaseBackendConnectorSpec {
               id = SubscriptionCreationService.Requests.Id(SubscriptionCreationService.Requests.IdType.NINO, "AA000000A"),
               name = Some("Harold Winter"),
               contacts = Seq(
-                SubscriptionService.Requests.Individual(
+                SubscriptionService.RequestOrResponse.Individual(
                   firstName = "Patrick",
                   middleName = Some("John"),
                   lastName = "Dyson",
@@ -257,7 +257,7 @@ class SubscriptionCreationServiceSpec extends BaseBackendConnectorSpec {
                   mobile = Some("38390756243"),
                   emailAddress = "Patrick.Dyson@example.com"
                 ),
-                SubscriptionService.Requests.Organisation(name = "Dyson",
+                SubscriptionService.RequestOrResponse.Organisation(name = "Dyson",
                                                           landline = Some("847663966"),
                                                           mobile = Some("48390756243"),
                                                           emailAddress = "info@example.com"
@@ -323,14 +323,14 @@ class SubscriptionCreationServiceSpec extends BaseBackendConnectorSpec {
               id = SubscriptionCreationService.Requests.Id(SubscriptionCreationService.Requests.IdType.NINO, "AA000000A"),
               name = Some("Harold Winter"),
               contacts = Seq(
-                SubscriptionService.Requests.Individual(firstName = "",
+                SubscriptionService.RequestOrResponse.Individual(firstName = "",
                                                         middleName = Some("John"),
                                                         lastName = "",
                                                         landline = Some("747663966"),
                                                         mobile = Some("38390756243"),
                                                         emailAddress = "Patrick.Dyson@example.com"
                 ),
-                SubscriptionService.Requests.Organisation(name = "Dyson",
+                SubscriptionService.RequestOrResponse.Organisation(name = "Dyson",
                                                           landline = Some("847663966"),
                                                           mobile = Some("48390756243"),
                                                           emailAddress = "info@example.com"
@@ -399,7 +399,7 @@ class SubscriptionCreationServiceSpec extends BaseBackendConnectorSpec {
               id = SubscriptionCreationService.Requests.Id(SubscriptionCreationService.Requests.IdType.NINO, "AA000000A"),
               name = Some("Harold Winter"),
               contacts = Seq(
-                SubscriptionService.Requests.Individual(
+                SubscriptionService.RequestOrResponse.Individual(
                   firstName = "Patrick",
                   middleName = Some("John"),
                   lastName = "Dyson",
@@ -407,7 +407,7 @@ class SubscriptionCreationServiceSpec extends BaseBackendConnectorSpec {
                   mobile = Some("38390756243"),
                   emailAddress = "Patrick.Dyson@example.com"
                 ),
-                SubscriptionService.Requests.Organisation(name = "Dyson",
+                SubscriptionService.RequestOrResponse.Organisation(name = "Dyson",
                                                           landline = Some("847663966"),
                                                           mobile = Some("48390756243"),
                                                           emailAddress = "info@example.com"
@@ -475,7 +475,7 @@ class SubscriptionCreationServiceSpec extends BaseBackendConnectorSpec {
               id = SubscriptionCreationService.Requests.Id(SubscriptionCreationService.Requests.IdType.NINO, "AA000000A"),
               name = Some("Harold Winter"),
               contacts = Seq(
-                SubscriptionService.Requests.Individual(
+                SubscriptionService.RequestOrResponse.Individual(
                   firstName = "Patrick",
                   middleName = Some("John"),
                   lastName = "Dyson",
@@ -483,7 +483,7 @@ class SubscriptionCreationServiceSpec extends BaseBackendConnectorSpec {
                   mobile = Some("38390756243"),
                   emailAddress = "Patrick.Dyson@example.com"
                 ),
-                SubscriptionService.Requests.Organisation(name = "Dyson",
+                SubscriptionService.RequestOrResponse.Organisation(name = "Dyson",
                                                           landline = Some("847663966"),
                                                           mobile = Some("48390756243"),
                                                           emailAddress = "info@example.com"
@@ -553,7 +553,7 @@ class SubscriptionCreationServiceSpec extends BaseBackendConnectorSpec {
               id = SubscriptionCreationService.Requests.Id(SubscriptionCreationService.Requests.IdType.NINO, "AA000000A"),
               name = Some("Harold Winter"),
               contacts = Seq(
-                SubscriptionService.Requests.Individual(
+                SubscriptionService.RequestOrResponse.Individual(
                   firstName = "Patrick",
                   middleName = Some("John"),
                   lastName = "Dyson",
@@ -561,7 +561,7 @@ class SubscriptionCreationServiceSpec extends BaseBackendConnectorSpec {
                   mobile = Some("38390756243"),
                   emailAddress = "Patrick.Dyson@example.com"
                 ),
-                SubscriptionService.Requests.Organisation(name = "Dyson",
+                SubscriptionService.RequestOrResponse.Organisation(name = "Dyson",
                                                           landline = Some("847663966"),
                                                           mobile = Some("48390756243"),
                                                           emailAddress = "info@example.com"
@@ -619,7 +619,7 @@ class SubscriptionCreationServiceSpec extends BaseBackendConnectorSpec {
               id = SubscriptionCreationService.Requests.Id(SubscriptionCreationService.Requests.IdType.NINO, "AA000000A"),
               name = Some("Harold Winter"),
               contacts = Seq(
-                SubscriptionService.Requests.Individual(
+                SubscriptionService.RequestOrResponse.Individual(
                   firstName = "Patrick",
                   middleName = Some("John"),
                   lastName = "Dyson",
@@ -627,7 +627,7 @@ class SubscriptionCreationServiceSpec extends BaseBackendConnectorSpec {
                   mobile = Some("38390756243"),
                   emailAddress = "Patrick.Dyson@example.com"
                 ),
-                SubscriptionService.Requests.Organisation(name = "Dyson",
+                SubscriptionService.RequestOrResponse.Organisation(name = "Dyson",
                                                           landline = Some("847663966"),
                                                           mobile = Some("48390756243"),
                                                           emailAddress = "info@example.com"

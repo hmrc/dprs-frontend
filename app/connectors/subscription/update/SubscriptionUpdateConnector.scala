@@ -18,33 +18,26 @@ package connectors.subscription.update
 
 import com.google.inject.Inject
 import config.FrontendAppConfig
-import connectors.subscription.SubscriptionConnector.Requests.Contact
+import connectors.BaseConnector
+import connectors.subscription.SubscriptionConnector
+import connectors.subscription.SubscriptionConnector.RequestOrResponse.Contact
 import connectors.subscription.update.SubscriptionUpdateConnector.Requests.Request
-import connectors.{BaseBackendConnector, BaseConnector}
 import play.api.libs.functional.syntax.toFunctionalBuilderOps
 import play.api.libs.json.{JsPath, OWrites}
 import play.api.libs.ws.WSClient
 
-import java.net.URL
 import scala.concurrent.{ExecutionContext, Future}
 
 class SubscriptionUpdateConnector @Inject() (frontendAppConfig: FrontendAppConfig, wsClient: WSClient)
-    extends BaseBackendConnector[Request, BaseConnector.Responses.EmptyResponse](frontendAppConfig, wsClient) {
-
-  override def connectorPath: String = SubscriptionUpdateConnector.connectorPath
+    extends SubscriptionConnector[Request, BaseConnector.Responses.EmptyResponse](frontendAppConfig, wsClient) {
 
   override def call(request: Request)(implicit
     executionContext: ExecutionContext
   ): Future[Either[BaseConnector.Responses.Errors, Option[BaseConnector.Responses.EmptyResponse]]] =
-    post(fullUrl(request), request)
-
-  private def fullUrl(request: Request) =
-    new URL(s"${baseUrl().toString}/${request.id}")
+    post(baseUrl().append(request.id), request)
 }
 
 object SubscriptionUpdateConnector {
-
-  val connectorPath: String = "/subscriptions"
 
   object Requests {
 

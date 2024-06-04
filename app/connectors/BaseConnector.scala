@@ -33,7 +33,25 @@ abstract class BaseConnector[REQUEST, RESPONSE](wsClient: WSClient) {
 
   /** We would have liked to use HttpClientV2, but when it encounters a 400 or 500 status code, the response body is inaccessible.
     */
-  def post(url: URL, request: REQUEST)(implicit
+  final protected def get(url: URL)(implicit
+    executionContext: ExecutionContext,
+    reads: Reads[RESPONSE]
+  ): Future[Either[Errors, Option[RESPONSE]]] =
+    wsClient
+      .url(url.toString)
+      .get()
+      .transform {
+        case Success(wsResponse) =>
+          wsResponse.status match {
+            case OK              => asResponse(wsResponse)
+            case otherStatusCode => asErrors(otherStatusCode, wsResponse)
+          }
+        case Failure(exception) => Failure(exception)
+      }
+
+  /** We would have liked to use HttpClientV2, but when it encounters a 400 or 500 status code, the response body is inaccessible.
+    */
+  final protected def post(url: URL, request: REQUEST)(implicit
     executionContext: ExecutionContext,
     writes: Writes[REQUEST],
     reads: Reads[RESPONSE]
@@ -50,7 +68,7 @@ abstract class BaseConnector[REQUEST, RESPONSE](wsClient: WSClient) {
         case Failure(exception) => Failure(exception)
       }
 
-  def post(request: REQUEST)(implicit
+  final protected def post(request: REQUEST)(implicit
     executionContext: ExecutionContext,
     writes: Writes[REQUEST],
     reads: Reads[RESPONSE]
@@ -63,19 +81,34 @@ abstract class BaseConnector[REQUEST, RESPONSE](wsClient: WSClient) {
     wsResponse.status match {
       case NO_CONTENT => Success(Right(None))
       case _ =>
-        wsResponse.json
-          .validate[RESPONSE]
-          .map(response => Success(Right(Some(response))))
-          .getOrElse(Failure(new ResponseParsingException()))
+        Try(
+          wsResponse.json
+            .validate[RESPONSE]
+            .map(response => Success(Right(Some(response))))
+            .get
+        ) match {
+          case Success(result) => result
+          case Failure(_)      => Failure(new ResponseParsingException())
+        }
     }
 
   private def asErrors(statusCode: Int, wsResponse: WSResponse): Try[Either[Errors, Option[RESPONSE]]] =
-    if (wsResponse.body.nonEmpty)
-      wsResponse.json
-        .validate[Seq[BaseConnector.Responses.Error]]
-        .map(errors => Success(Left(Errors(statusCode, errors))))
-        .getOrElse(Failure(new ResponseParsingException()))
-    else Success(Left(Errors(statusCode)))
+    if (wsResponse.body.nonEmpty) {
+      Try(
+        wsResponse.json
+          .validate[Seq[BaseConnector.Responses.Error]]
+          .map(errors => Success(Left(Errors(statusCode, errors))))
+          .get
+      ) match {
+        case Success(result) => result
+        case Failure(_)      => Failure(new ResponseParsingException())
+      }
+    } else Success(Left(Errors(statusCode)))
+
+  implicit class UrlHelper(url: URL) {
+    def append(id: String) =
+      new URL(s"${url.toString}/$id")
+  }
 }
 
 object BaseConnector {

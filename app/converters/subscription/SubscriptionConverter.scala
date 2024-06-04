@@ -16,19 +16,19 @@
 
 package converters.subscription
 
-import connectors.subscription.SubscriptionConnector.{Requests => ConnectorDataRequests}
+import connectors.subscription.SubscriptionConnector.{RequestOrResponse => ConnectorRequests}
 import converters.BaseConverter
-import services.subscription.SubscriptionService.{Requests => ServiceDataRequests}
+import services.subscription.SubscriptionService.{RequestOrResponse => ServiceRequests}
 
 abstract class SubscriptionConverter[SERVICE_REQUEST, CONNECTOR_REQUEST, CONNECTOR_RESPONSE, SERVICE_RESPONSE]
     extends BaseConverter[SERVICE_REQUEST, CONNECTOR_REQUEST, CONNECTOR_RESPONSE, SERVICE_RESPONSE] {
 
-  protected def convert(contact: ServiceDataRequests.Contact): ConnectorDataRequests.Contact =
+  protected def convert(contact: ServiceRequests.Contact): ConnectorRequests.Contact =
     contact match {
-      case ServiceDataRequests.Individual(firstName, middleName, lastName, landline, mobile, emailAddress) =>
-        ConnectorDataRequests.Individual("I", firstName, middleName, lastName, landline, mobile, emailAddress)
-      case ServiceDataRequests.Organisation(name, landline, mobile, emailAddress) =>
-        ConnectorDataRequests.Organisation("O", name, landline, mobile, emailAddress)
+      case ServiceRequests.Individual(firstName, middleName, lastName, landline, mobile, emailAddress) =>
+        ConnectorRequests.Individual("I", firstName, middleName, lastName, landline, mobile, emailAddress)
+      case ServiceRequests.Organisation(name, landline, mobile, emailAddress) =>
+        ConnectorRequests.Organisation("O", name, landline, mobile, emailAddress)
     }
 
 }
