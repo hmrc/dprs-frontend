@@ -253,7 +253,7 @@ class RegistrationWithoutIdForIndividualServiceSpec extends BaseBackendConnector
                       |{
                       |    "firstName": "Patrick",
                       |    "middleName": "John",
-                      |    "lastName": "",
+                      |    "lastName": "Dyson",
                       |    "dateOfBirth": "10-04-1970",
                       |    "address": {
                       |        "lineOne": "34 Park Lane",
@@ -291,7 +291,7 @@ class RegistrationWithoutIdForIndividualServiceSpec extends BaseBackendConnector
             val request = Request(
               firstName = "Patrick",
               middleName = Some("John"),
-              lastName = "",
+              lastName = "Dyson",
               dateOfBirth = "10-04-1970",
               address = CommonRegistrationWithoutIdRequests.Address(lineOne = "34 Park Lane",
                                                                     lineTwo = Some("Building A"),
@@ -327,7 +327,7 @@ class RegistrationWithoutIdForIndividualServiceSpec extends BaseBackendConnector
                                                |{
                                                |    "firstName": "Patrick",
                                                |    "middleName": "John",
-                                               |    "lastName": "",
+                                               |    "lastName": "Dyson",
                                                |    "dateOfBirth": "10-04-1970",
                                                |    "address": {
                                                |        "lineOne": "34 Park Lane",
@@ -362,7 +362,7 @@ class RegistrationWithoutIdForIndividualServiceSpec extends BaseBackendConnector
             val request = Request(
               firstName = "Patrick",
               middleName = Some("John"),
-              lastName = "",
+              lastName = "Dyson",
               dateOfBirth = "10-04-1970",
               address = CommonRegistrationWithoutIdRequests.Address(lineOne = "34 Park Lane",
                                                                     lineTwo = Some("Building A"),
@@ -385,6 +385,77 @@ class RegistrationWithoutIdForIndividualServiceSpec extends BaseBackendConnector
                 CONFLICT,
                 Seq(
                   CommonResponses.Error("eis-returned-conflict")
+                )
+              )
+            )
+            verifyThatDownstreamApiWasCalled()
+          }
+          "forbidden" in {
+            stubFor(
+              post(urlEqualTo(connectorPath))
+                .withRequestBody(equalToJson("""
+                                               |{
+                                               |    "firstName": "Patrick",
+                                               |    "middleName": "John",
+                                               |    "lastName": "Dyson",
+                                               |    "dateOfBirth": "10-04-1970",
+                                               |    "address": {
+                                               |        "lineOne": "34 Park Lane",
+                                               |        "lineTwo": "Building A",
+                                               |        "lineThree": "Suite 100",
+                                               |        "lineFour": "Manchester",
+                                               |        "postalCode": "M54 1MQ",
+                                               |        "countryCode": "GB"
+                                               |    },
+                                               |    "contactDetails": {
+                                               |        "landline": "747663966",
+                                               |        "mobile": "38390756243",
+                                               |        "fax": "58371813020",
+                                               |        "emailAddress": "Patrick.Dyson@example.com"
+                                               |    }
+                                               |}
+                                               |""".stripMargin))
+                .willReturn(
+                  aResponse()
+                    .withHeader("Content-Type", "application/json")
+                    .withStatus(FORBIDDEN)
+                    .withBody("""
+                                |[
+                                |  {
+                                |    "code": "eis-returned-forbidden"
+                                |  }
+                                |]
+                                |""".stripMargin)
+                )
+            )
+
+            val request = Request(
+              firstName = "Patrick",
+              middleName = Some("John"),
+              lastName = "Dyson",
+              dateOfBirth = "10-04-1970",
+              address = CommonRegistrationWithoutIdRequests.Address(
+                lineOne = "34 Park Lane",
+                lineTwo = Some("Building A"),
+                lineThree = Some("Suite 100"),
+                lineFour = Some("Manchester"),
+                postalCode = "M54 1MQ",
+                countryCode = "GB"
+              ),
+              contactDetails = CommonRegistrationWithoutIdRequests.ContactDetails(landline = Some("747663966"),
+                mobile = Some("38390756243"),
+                fax = Some("58371813020"),
+                emailAddress = Some("Patrick.Dyson@example.com")
+              )
+            )
+
+            val response = await(service.call(request))
+
+            response shouldBe Left(
+              CommonResponses.Errors(
+                FORBIDDEN,
+                Seq(
+                  CommonResponses.Error("eis-returned-forbidden")
                 )
               )
             )
