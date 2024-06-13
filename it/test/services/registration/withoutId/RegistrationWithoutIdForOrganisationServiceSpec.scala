@@ -233,9 +233,9 @@ class RegistrationWithoutIdForOrganisationServiceSpec extends BaseBackendConnect
               post(urlEqualTo(connectorPath))
                 .withRequestBody(equalToJson("""
                                                |{
-                                               |    "name": "",
+                                               |    "name": "Dyson",
                                                |    "address": {
-                                               |        "lineOne": "",
+                                               |        "lineOne": "34 Park Lane",
                                                |        "lineTwo": "Building A",
                                                |        "lineThree": "Suite 100",
                                                |        "lineFour": "Manchester",
@@ -268,8 +268,8 @@ class RegistrationWithoutIdForOrganisationServiceSpec extends BaseBackendConnect
             )
 
             val request = Request(
-              name = "",
-              address = CommonRegistrationWithoutIdRequests.Address(lineOne = "",
+              name = "Dyson",
+              address = CommonRegistrationWithoutIdRequests.Address(lineOne = "34 Park Lane",
                                                                     lineTwo = Some("Building A"),
                                                                     lineThree = Some("Suite 100"),
                                                                     lineFour = Some("Manchester"),
@@ -301,9 +301,9 @@ class RegistrationWithoutIdForOrganisationServiceSpec extends BaseBackendConnect
               post(urlEqualTo(connectorPath))
                 .withRequestBody(equalToJson("""
                                                |{
-                                               |    "name": "",
+                                               |    "name": "Dyson",
                                                |    "address": {
-                                               |        "lineOne": "",
+                                               |        "lineOne": "34 Park Lane",
                                                |        "lineTwo": "Building A",
                                                |        "lineThree": "Suite 100",
                                                |        "lineFour": "Manchester",
@@ -333,8 +333,8 @@ class RegistrationWithoutIdForOrganisationServiceSpec extends BaseBackendConnect
             )
 
             val request = Request(
-              name = "",
-              address = CommonRegistrationWithoutIdRequests.Address(lineOne = "",
+              name = "Dyson",
+              address = CommonRegistrationWithoutIdRequests.Address(lineOne = "34 Park Lane",
                                                                     lineTwo = Some("Building A"),
                                                                     lineThree = Some("Suite 100"),
                                                                     lineFour = Some("Manchester"),
@@ -355,6 +355,71 @@ class RegistrationWithoutIdForOrganisationServiceSpec extends BaseBackendConnect
                 CONFLICT,
                 Seq(
                   CommonResponses.Error("eis-returned-conflict")
+                )
+              )
+            )
+            verifyThatDownstreamApiWasCalled()
+          }
+          "forbidden" in {
+            stubFor(
+              post(urlEqualTo(connectorPath))
+                .withRequestBody(equalToJson("""
+                                               |{
+                                               |    "name": "Dyson",
+                                               |    "address": {
+                                               |        "lineOne": "34 Park Lane",
+                                               |        "lineTwo": "Building A",
+                                               |        "lineThree": "Suite 100",
+                                               |        "lineFour": "Manchester",
+                                               |        "postalCode": "M54 1MQ",
+                                               |        "countryCode": "GB"
+                                               |    },
+                                               |    "contactDetails": {
+                                               |        "landline": "747663966",
+                                               |        "mobile": "38390756243",
+                                               |        "fax": "58371813020",
+                                               |        "emailAddress": "dyson@example.com"
+                                               |    }
+                                               |}
+                                               |""".stripMargin))
+                .willReturn(
+                  aResponse()
+                    .withHeader("Content-Type", "application/json")
+                    .withStatus(FORBIDDEN)
+                    .withBody("""
+                                |[
+                                |  {
+                                |    "code": "eis-returned-forbidden"
+                                |  }
+                                |]
+                                |""".stripMargin)
+                )
+            )
+
+            val request = Request(
+              name = "Dyson",
+              address = CommonRegistrationWithoutIdRequests.Address(
+                lineOne = "34 Park Lane",
+                lineTwo = Some("Building A"),
+                lineThree = Some("Suite 100"),
+                lineFour = Some("Manchester"),
+                postalCode = "M54 1MQ",
+                countryCode = "GB"
+              ),
+              contactDetails = CommonRegistrationWithoutIdRequests.ContactDetails(landline = Some("747663966"),
+                mobile = Some("38390756243"),
+                fax = Some("58371813020"),
+                emailAddress = Some("dyson@example.com")
+              )
+            )
+
+            val response = await(service.call(request))
+
+            response shouldBe Left(
+              CommonResponses.Errors(
+                FORBIDDEN,
+                Seq(
+                  CommonResponses.Error("eis-returned-forbidden")
                 )
               )
             )
