@@ -17,9 +17,8 @@
 package services.registration.withId
 
 import com.github.tomakehurst.wiremock.client.WireMock._
-import connectors.BaseConnector.Exceptions.ResponseParsingException
 import connectors.registration.withId.RegistrationWithIdForOrganisationConnector
-import play.api.http.Status.{BAD_REQUEST, INTERNAL_SERVER_ERROR, OK, SERVICE_UNAVAILABLE}
+import play.api.http.Status._
 import services.BaseBackendConnectorSpec
 import services.BaseService.{Responses => CommonResponses}
 import services.registration.BaseRegistrationService.{Responses => CommonRegistrationResponses}
@@ -166,54 +165,6 @@ class RegistrationWithIdForOrganisationServiceSpec extends BaseBackendConnectorS
           }
         }
         "valid, with a status code of" - {
-          "service unavailable" in {
-            stubFor(
-              post(urlEqualTo(connectorPath))
-                .withRequestBody(equalToJson("""
-                                               |{
-                                               |  "id": {
-                                               |    "type": "UTR",
-                                               |    "value": "1234567890"
-                                               |  },
-                                               |  "name": "Dyson",
-                                               |  "type": "CorporateBody"
-                                               |}
-                                               |""".stripMargin))
-                .willReturn(
-                  aResponse()
-                    .withHeader("Content-Type", "application/json")
-                    .withStatus(SERVICE_UNAVAILABLE)
-                    .withBody("""
-                                |[
-                                |  {
-                                |    "code": "eis-returned-service-unavailable"
-                                |  }
-                                |]
-                                |""".stripMargin)
-                )
-            )
-
-            val request = Request(
-              id = Requests.Id(
-                idType = Requests.IdType.UTR,
-                value = "1234567890"
-              ),
-              name = "Dyson",
-              _type = Requests.Type.CorporateBody
-            )
-
-            val response = await(service.call(request))
-
-            response shouldBe Left(
-              CommonResponses.Errors(
-                SERVICE_UNAVAILABLE,
-                Seq(
-                  CommonResponses.Error("eis-returned-service-unavailable")
-                )
-              )
-            )
-            verifyThatDownstreamApiWasCalled()
-          }
           "bad request" in {
             stubFor(
               post(urlEqualTo(connectorPath))
@@ -266,9 +217,7 @@ class RegistrationWithIdForOrganisationServiceSpec extends BaseBackendConnectorS
             )
             verifyThatDownstreamApiWasCalled()
           }
-        }
-        "invalid, with a status code of" - {
-          "service unavailable" in {
+          "internal error" in {
             stubFor(
               post(urlEqualTo(connectorPath))
                 .withRequestBody(equalToJson("""
@@ -288,7 +237,7 @@ class RegistrationWithIdForOrganisationServiceSpec extends BaseBackendConnectorS
                     .withBody("""
                                 |[
                                 |  {
-                                |    "codes": "eis-returned-service-unavailable"
+                                |    "code": "eis-returned-internal-error"
                                 |  }
                                 |]
                                 |""".stripMargin)
@@ -304,12 +253,19 @@ class RegistrationWithIdForOrganisationServiceSpec extends BaseBackendConnectorS
               _type = Requests.Type.CorporateBody
             )
 
-            assertThrows[ResponseParsingException] {
-              await(service.call(request))
-            }
+            val response = await(service.call(request))
+
+            response shouldBe Left(
+              CommonResponses.Errors(
+                SERVICE_UNAVAILABLE,
+                Seq(
+                  CommonResponses.Error("eis-returned-internal-error")
+                )
+              )
+            )
             verifyThatDownstreamApiWasCalled()
           }
-          "OK" in {
+          "could not be processed" in {
             stubFor(
               post(urlEqualTo(connectorPath))
                 .withRequestBody(equalToJson("""
@@ -325,39 +281,13 @@ class RegistrationWithIdForOrganisationServiceSpec extends BaseBackendConnectorS
                 .willReturn(
                   aResponse()
                     .withHeader("Content-Type", "application/json")
-                    .withStatus(OK)
+                    .withStatus(SERVICE_UNAVAILABLE)
                     .withBody("""
-                          {
-                                |  "type": "CorporateBody",
-                                |  "ids": [
-                                |    {
-                                |      "type": "ARN",
-                                |      "value": "WARN1442450"
-                                |    },
-                                |    {
-                                |      "type": "SAFE",
-                                |      "value": "XE0000586571722"
-                                |    },
-                                |    {
-                                |      "type": "SAP",
-                                |      "value": "8231791429"
-                                |    }
-                                |  ],
-                                |  "address": {
-                                |    "lineOne": "2627 Gus Hill",
-                                |    "lineTwo": "Apt. 898",
-                                |    "lineThree": "",
-                                |    "lineFour": "West Corrinamouth",
-                                |    "postalCode": "OX2 3HD",
-                                |    "countryCode": "AD"
-                                |  },
-                                |  "contactDetails": {
-                                |    "landline": "176905117",
-                                |    "mobile": "62281724761",
-                                |    "fax": "08959633679",
-                                |    "emailAddress": "edward.goodenough@example.com"
+                                |[
+                                |  {
+                                |    "code": "eis-returned-could-not-be-processed"
                                 |  }
-                                |}
+                                |]
                                 |""".stripMargin)
                 )
             )
@@ -371,9 +301,208 @@ class RegistrationWithIdForOrganisationServiceSpec extends BaseBackendConnectorS
               _type = Requests.Type.CorporateBody
             )
 
-            assertThrows[ResponseParsingException] {
-              await(service.call(request))
-            }
+            val response = await(service.call(request))
+
+            response shouldBe Left(
+              CommonResponses.Errors(
+                SERVICE_UNAVAILABLE,
+                Seq(
+                  CommonResponses.Error("eis-returned-could-not-be-processed")
+                )
+              )
+            )
+            verifyThatDownstreamApiWasCalled()
+          }
+          "duplicate submission" in {
+            stubFor(
+              post(urlEqualTo(connectorPath))
+                .withRequestBody(equalToJson("""
+                                               |{
+                                               |  "id": {
+                                               |    "type": "UTR",
+                                               |    "value": "1234567890"
+                                               |  },
+                                               |  "name": "Dyson",
+                                               |  "type": "CorporateBody"
+                                               |}
+                                               |""".stripMargin))
+                .willReturn(
+                  aResponse()
+                    .withHeader("Content-Type", "application/json")
+                    .withStatus(CONFLICT)
+                    .withBody("""
+                                |[
+                                |  {
+                                |    "code": "eis-returned-duplicate submission"
+                                |  }
+                                |]
+                                |""".stripMargin)
+                )
+            )
+
+            val request = Request(
+              id = Requests.Id(
+                idType = Requests.IdType.UTR,
+                value = "1234567890"
+              ),
+              name = "Dyson",
+              _type = Requests.Type.CorporateBody
+            )
+
+            val response = await(service.call(request))
+
+            response shouldBe Left(
+              CommonResponses.Errors(
+                CONFLICT,
+                Seq(
+                  CommonResponses.Error("eis-returned-duplicate submission")
+                )
+              )
+            )
+            verifyThatDownstreamApiWasCalled()
+          }
+          "forbidden" in {
+            stubFor(
+              post(urlEqualTo(connectorPath))
+                .withRequestBody(equalToJson("""
+                                               |{
+                                               |  "id": {
+                                               |    "type": "UTR",
+                                               |    "value": "1234567890"
+                                               |  },
+                                               |  "name": "Dyson",
+                                               |  "type": "CorporateBody"
+                                               |}
+                                               |""".stripMargin))
+                .willReturn(
+                  aResponse()
+                    .withHeader("Content-Type", "application/json")
+                    .withStatus(FORBIDDEN)
+                    .withBody("""
+                                |[
+                                |  {
+                                |    "code": "eis-returned-forbidden"
+                                |  }
+                                |]
+                                |""".stripMargin)
+                )
+            )
+
+            val request = Request(
+              id = Requests.Id(
+                idType = Requests.IdType.UTR,
+                value = "1234567890"
+              ),
+              name = "Dyson",
+              _type = Requests.Type.CorporateBody
+            )
+
+            val response = await(service.call(request))
+
+            response shouldBe Left(
+              CommonResponses.Errors(
+                FORBIDDEN,
+                Seq(
+                  CommonResponses.Error("eis-returned-forbidden")
+                )
+              )
+            )
+            verifyThatDownstreamApiWasCalled()
+          }
+          "no match" in {
+            stubFor(
+              post(urlEqualTo(connectorPath))
+                .withRequestBody(equalToJson("""
+                                               |{
+                                               |  "id": {
+                                               |    "type": "UTR",
+                                               |    "value": "1234567890"
+                                               |  },
+                                               |  "name": "Dyson",
+                                               |  "type": "CorporateBody"
+                                               |}
+                                               |""".stripMargin))
+                .willReturn(
+                  aResponse()
+                    .withHeader("Content-Type", "application/json")
+                    .withStatus(NOT_FOUND)
+                    .withBody("""
+                                |[
+                                |  {
+                                |    "code": "eis-returned-not-found"
+                                |  }
+                                |]
+                                |""".stripMargin)
+                )
+            )
+
+            val request = Request(
+              id = Requests.Id(
+                idType = Requests.IdType.UTR,
+                value = "1234567890"
+              ),
+              name = "Dyson",
+              _type = Requests.Type.CorporateBody
+            )
+
+            val response = await(service.call(request))
+
+            response shouldBe Left(
+              CommonResponses.Errors(
+                NOT_FOUND,
+                Seq(
+                  CommonResponses.Error("eis-returned-not-found")
+                )
+              )
+            )
+            verifyThatDownstreamApiWasCalled()
+          }
+          "unauthorised" in {
+            stubFor(
+              post(urlEqualTo(connectorPath))
+                .withRequestBody(equalToJson("""
+                                               |{
+                                               |  "id": {
+                                               |    "type": "UTR",
+                                               |    "value": "1234567890"
+                                               |  },
+                                               |  "name": "Dyson",
+                                               |  "type": "CorporateBody"
+                                               |}
+                                               |""".stripMargin))
+                .willReturn(
+                  aResponse()
+                    .withHeader("Content-Type", "application/json")
+                    .withStatus(UNAUTHORIZED)
+                    .withBody("""
+                                |[
+                                |  {
+                                |    "code": "eis-returned-unauthorised"
+                                |  }
+                                |]
+                                |""".stripMargin)
+                )
+            )
+
+            val request = Request(
+              id = Requests.Id(
+                idType = Requests.IdType.UTR,
+                value = "1234567890"
+              ),
+              name = "Dyson",
+              _type = Requests.Type.CorporateBody
+            )
+
+            val response = await(service.call(request))
+
+            response shouldBe Left(
+              CommonResponses.Errors(
+                UNAUTHORIZED,
+                Seq(
+                  CommonResponses.Error("eis-returned-unauthorised")
+                )
+              )
+            )
             verifyThatDownstreamApiWasCalled()
           }
         }

@@ -17,9 +17,8 @@
 package services.registration.withId
 
 import com.github.tomakehurst.wiremock.client.WireMock._
-import connectors.BaseConnector.Exceptions.ResponseParsingException
 import connectors.registration.withId.RegistrationWithIdForIndividualConnector
-import play.api.http.Status.{BAD_REQUEST, INTERNAL_SERVER_ERROR, OK, SERVICE_UNAVAILABLE}
+import play.api.http.Status.{BAD_REQUEST, CONFLICT, FORBIDDEN, INTERNAL_SERVER_ERROR, NOT_FOUND, OK, SERVICE_UNAVAILABLE, UNAUTHORIZED}
 import services.BaseBackendConnectorSpec
 import services.BaseService.{Responses => CommonResponses}
 import services.registration.BaseRegistrationService.{Responses => CommonRegistrationResponses}
@@ -177,58 +176,6 @@ class RegistrationWithIdForIndividualServiceSpec extends BaseBackendConnectorSpe
           }
         }
         "valid, with a status code of" - {
-          "service unavailable" in {
-            stubFor(
-              post(urlEqualTo(connectorPath))
-                .withRequestBody(equalToJson("""
-                                               |{
-                                               |  "id": {
-                                               |    "type": "NINO",
-                                               |    "value": "AA000000A"
-                                               |  },
-                                               |  "firstName": "Patrick",
-                                               |  "middleName": "John",
-                                               |  "lastName": "Dyson",
-                                               |  "dateOfBirth": "1970-10-04"
-                                               |}
-                                               |""".stripMargin))
-                .willReturn(
-                  aResponse()
-                    .withHeader("Content-Type", "application/json")
-                    .withStatus(SERVICE_UNAVAILABLE)
-                    .withBody("""
-                                |[
-                                |  {
-                                |    "code": "eis-returned-service-unavailable"
-                                |  }
-                                |]
-                                |""".stripMargin)
-                )
-            )
-
-            val request = Request(
-              id = Requests.Id(
-                idType = Requests.IdType.NINO,
-                value = "AA000000A"
-              ),
-              firstName = "Patrick",
-              middleName = Some("John"),
-              lastName = "Dyson",
-              dateOfBirth = "1970-10-04"
-            )
-
-            val response = await(service.call(request))
-
-            response shouldBe Left(
-              CommonResponses.Errors(
-                SERVICE_UNAVAILABLE,
-                Seq(
-                  CommonResponses.Error("eis-returned-service-unavailable")
-                )
-              )
-            )
-            verifyThatDownstreamApiWasCalled()
-          }
           "bad request" in {
             stubFor(
               post(urlEqualTo(connectorPath))
@@ -285,9 +232,7 @@ class RegistrationWithIdForIndividualServiceSpec extends BaseBackendConnectorSpe
             )
             verifyThatDownstreamApiWasCalled()
           }
-        }
-        "invalid, with a status code of" - {
-          "service unavailable" in {
+          "internal error" in {
             stubFor(
               post(urlEqualTo(connectorPath))
                 .withRequestBody(equalToJson("""
@@ -299,7 +244,7 @@ class RegistrationWithIdForIndividualServiceSpec extends BaseBackendConnectorSpe
                                                |  "firstName": "Patrick",
                                                |  "middleName": "John",
                                                |  "lastName": "Dyson",
-                                               |  "dateOfBirth": "1970-10-04"
+                                               |  "dateOfBirth": "1970-04-10"
                                                |}
                                                |""".stripMargin))
                 .willReturn(
@@ -309,7 +254,7 @@ class RegistrationWithIdForIndividualServiceSpec extends BaseBackendConnectorSpe
                     .withBody("""
                                 |[
                                 |  {
-                                |    "codex": "eis-returned-service-unavailable"
+                                |    "code": "eis-returned-internal-error"
                                 |  }
                                 |]
                                 |""".stripMargin)
@@ -324,15 +269,22 @@ class RegistrationWithIdForIndividualServiceSpec extends BaseBackendConnectorSpe
               firstName = "Patrick",
               middleName = Some("John"),
               lastName = "Dyson",
-              dateOfBirth = "1970-10-04"
+              dateOfBirth = "1970-04-10"
             )
 
-            assertThrows[ResponseParsingException] {
-              await(service.call(request))
-            }
+            val response = await(service.call(request))
+
+            response shouldBe Left(
+              CommonResponses.Errors(
+                SERVICE_UNAVAILABLE,
+                Seq(
+                  CommonResponses.Error("eis-returned-internal-error")
+                )
+              )
+            )
             verifyThatDownstreamApiWasCalled()
           }
-          "OK" in {
+          "could not be processed" in {
             stubFor(
               post(urlEqualTo(connectorPath))
                 .withRequestBody(equalToJson("""
@@ -344,34 +296,19 @@ class RegistrationWithIdForIndividualServiceSpec extends BaseBackendConnectorSpe
                                                |  "firstName": "Patrick",
                                                |  "middleName": "John",
                                                |  "lastName": "Dyson",
-                                               |  "dateOfBirth": "1970-10-04"
+                                               |  "dateOfBirth": "1970-04-10"
                                                |}
                                                |""".stripMargin))
                 .willReturn(
                   aResponse()
                     .withHeader("Content-Type", "application/json")
-                    .withStatus(OK)
+                    .withStatus(SERVICE_UNAVAILABLE)
                     .withBody("""
-                                |{
-                                |  "ids": [
-                                |    {
-                                |      "type": "ARN",
-                                |      "value": "WARN3849921"
-                                |    },
-                                |    {
-                                |      "type": "SAFE",
-                                |      "value": "XE0000200775706"
-                                |    },
-                                |    {
-                                |      "type": "SAP",
-                                |      "value": "1960629967"
-                                |    }
-                                |  ],
-                                |  "firstName": "Patrick",
-                                |  "middleName": "John",
-                                |  "lastName": "Dyson",
-                                |  "dateOfBirth": "1970-10-04"
-                                |}
+                                |[
+                                |  {
+                                |    "code": "eis-returned-could-not-be-processed"
+                                |  }
+                                |]
                                 |""".stripMargin)
                 )
             )
@@ -384,13 +321,227 @@ class RegistrationWithIdForIndividualServiceSpec extends BaseBackendConnectorSpe
               firstName = "Patrick",
               middleName = Some("John"),
               lastName = "Dyson",
-              dateOfBirth = "1970-10-04"
+              dateOfBirth = "1970-04-10"
             )
 
-            assertThrows[ResponseParsingException] {
-              await(service.call(request))
-            }
+            val response = await(service.call(request))
 
+            response shouldBe Left(
+              CommonResponses.Errors(
+                SERVICE_UNAVAILABLE,
+                Seq(
+                  CommonResponses.Error("eis-returned-could-not-be-processed")
+                )
+              )
+            )
+            verifyThatDownstreamApiWasCalled()
+          }
+          "duplicate submission" in {
+            stubFor(
+              post(urlEqualTo(connectorPath))
+                .withRequestBody(equalToJson("""
+                                               |{
+                                               |  "id": {
+                                               |    "type": "NINO",
+                                               |    "value": "AA000000A"
+                                               |  },
+                                               |  "firstName": "Patrick",
+                                               |  "middleName": "John",
+                                               |  "lastName": "Dyson",
+                                               |  "dateOfBirth": "1970-04-10"
+                                               |}
+                                               |""".stripMargin))
+                .willReturn(
+                  aResponse()
+                    .withHeader("Content-Type", "application/json")
+                    .withStatus(CONFLICT)
+                    .withBody("""
+                                |[
+                                |  {
+                                |    "code": "eis-returned-duplicate-submission"
+                                |  }
+                                |]
+                                |""".stripMargin)
+                )
+            )
+
+            val request = Request(
+              id = Requests.Id(
+                idType = Requests.IdType.NINO,
+                value = "AA000000A"
+              ),
+              firstName = "Patrick",
+              middleName = Some("John"),
+              lastName = "Dyson",
+              dateOfBirth = "1970-04-10"
+            )
+
+            val response = await(service.call(request))
+
+            response shouldBe Left(
+              CommonResponses.Errors(
+                CONFLICT,
+                Seq(
+                  CommonResponses.Error("eis-returned-duplicate-submission")
+                )
+              )
+            )
+            verifyThatDownstreamApiWasCalled()
+          }
+          "forbidden" in {
+            stubFor(
+              post(urlEqualTo(connectorPath))
+                .withRequestBody(equalToJson("""
+                                               |{
+                                               |  "id": {
+                                               |    "type": "NINO",
+                                               |    "value": "AA000000A"
+                                               |  },
+                                               |  "firstName": "Patrick",
+                                               |  "middleName": "John",
+                                               |  "lastName": "Dyson",
+                                               |  "dateOfBirth": "1970-04-10"
+                                               |}
+                                               |""".stripMargin))
+                .willReturn(
+                  aResponse()
+                    .withHeader("Content-Type", "application/json")
+                    .withStatus(FORBIDDEN)
+                    .withBody("""
+                                |[
+                                |  {
+                                |    "code": "eis-returned-forbidden"
+                                |  }
+                                |]
+                                |""".stripMargin)
+                )
+            )
+
+            val request = Request(
+              id = Requests.Id(
+                idType = Requests.IdType.NINO,
+                value = "AA000000A"
+              ),
+              firstName = "Patrick",
+              middleName = Some("John"),
+              lastName = "Dyson",
+              dateOfBirth = "1970-04-10"
+            )
+
+            val response = await(service.call(request))
+
+            response shouldBe Left(
+              CommonResponses.Errors(
+                FORBIDDEN,
+                Seq(
+                  CommonResponses.Error("eis-returned-forbidden")
+                )
+              )
+            )
+            verifyThatDownstreamApiWasCalled()
+          }
+          "no match" in {
+            stubFor(
+              post(urlEqualTo(connectorPath))
+                .withRequestBody(equalToJson("""
+                                               |{
+                                               |  "id": {
+                                               |    "type": "NINO",
+                                               |    "value": "AA000000A"
+                                               |  },
+                                               |  "firstName": "Patrick",
+                                               |  "middleName": "John",
+                                               |  "lastName": "Dyson",
+                                               |  "dateOfBirth": "1970-04-10"
+                                               |}
+                                               |""".stripMargin))
+                .willReturn(
+                  aResponse()
+                    .withHeader("Content-Type", "application/json")
+                    .withStatus(NOT_FOUND)
+                    .withBody("""
+                                |[
+                                |  {
+                                |    "code": "eis-returned-not-found"
+                                |  }
+                                |]
+                                |""".stripMargin)
+                )
+            )
+
+            val request = Request(
+              id = Requests.Id(
+                idType = Requests.IdType.NINO,
+                value = "AA000000A"
+              ),
+              firstName = "Patrick",
+              middleName = Some("John"),
+              lastName = "Dyson",
+              dateOfBirth = "1970-04-10"
+            )
+
+            val response = await(service.call(request))
+
+            response shouldBe Left(
+              CommonResponses.Errors(
+                NOT_FOUND,
+                Seq(
+                  CommonResponses.Error("eis-returned-not-found")
+                )
+              )
+            )
+            verifyThatDownstreamApiWasCalled()
+          }
+          "unauthorised" in {
+            stubFor(
+              post(urlEqualTo(connectorPath))
+                .withRequestBody(equalToJson("""
+                                               |{
+                                               |  "id": {
+                                               |    "type": "NINO",
+                                               |    "value": "AA000000A"
+                                               |  },
+                                               |  "firstName": "Patrick",
+                                               |  "middleName": "John",
+                                               |  "lastName": "Dyson",
+                                               |  "dateOfBirth": "1970-04-10"
+                                               |}
+                                               |""".stripMargin))
+                .willReturn(
+                  aResponse()
+                    .withHeader("Content-Type", "application/json")
+                    .withStatus(UNAUTHORIZED)
+                    .withBody("""
+                                |[
+                                |  {
+                                |    "code": "eis-returned-unauthorised"
+                                |  }
+                                |]
+                                |""".stripMargin)
+                )
+            )
+
+            val request = Request(
+              id = Requests.Id(
+                idType = Requests.IdType.NINO,
+                value = "AA000000A"
+              ),
+              firstName = "Patrick",
+              middleName = Some("John"),
+              lastName = "Dyson",
+              dateOfBirth = "1970-04-10"
+            )
+
+            val response = await(service.call(request))
+
+            response shouldBe Left(
+              CommonResponses.Errors(
+                UNAUTHORIZED,
+                Seq(
+                  CommonResponses.Error("eis-returned-unauthorised")
+                )
+              )
+            )
             verifyThatDownstreamApiWasCalled()
           }
         }
