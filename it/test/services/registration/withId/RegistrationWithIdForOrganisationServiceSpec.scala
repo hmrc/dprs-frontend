@@ -17,6 +17,7 @@
 package services.registration.withId
 
 import com.github.tomakehurst.wiremock.client.WireMock._
+import connectors.BaseConnector.Exceptions.ResponseParsingException
 import connectors.registration.withId.RegistrationWithIdForOrganisationConnector
 import play.api.http.Status._
 import services.BaseBackendConnectorSpec
@@ -503,6 +504,116 @@ class RegistrationWithIdForOrganisationServiceSpec extends BaseBackendConnectorS
                 )
               )
             )
+            verifyThatDownstreamApiWasCalled()
+          }
+        }
+        "invalid, with a status code of" - {
+          "service unavailable" in {
+            stubFor(
+              post(urlEqualTo(connectorPath))
+                .withRequestBody(equalToJson("""
+                                               |{
+                                               |  "id": {
+                                               |    "type": "UTR",
+                                               |    "value": "1234567890"
+                                               |  },
+                                               |  "name": "Dyson",
+                                               |  "type": "CorporateBody"
+                                               |}
+                                               |""".stripMargin))
+                .willReturn(
+                  aResponse()
+                    .withHeader("Content-Type", "application/json")
+                    .withStatus(SERVICE_UNAVAILABLE)
+                    .withBody("""
+                                |[
+                                |  {
+                                |    "codes": "eis-returned-service-unavailable"
+                                |  }
+                                |]
+                                |""".stripMargin)
+                )
+            )
+
+            val request = Request(
+              id = Requests.Id(
+                idType = Requests.IdType.UTR,
+                value = "1234567890"
+              ),
+              name = "Dyson",
+              _type = Requests.Type.CorporateBody
+            )
+
+            assertThrows[ResponseParsingException] {
+              await(service.call(request))
+            }
+            verifyThatDownstreamApiWasCalled()
+          }
+          "OK" in {
+            stubFor(
+              post(urlEqualTo(connectorPath))
+                .withRequestBody(equalToJson("""
+                                               |{
+                                               |  "id": {
+                                               |    "type": "UTR",
+                                               |    "value": "1234567890"
+                                               |  },
+                                               |  "name": "Dyson",
+                                               |  "type": "CorporateBody"
+                                               |}
+                                               |""".stripMargin))
+                .willReturn(
+                  aResponse()
+                    .withHeader("Content-Type", "application/json")
+                    .withStatus(OK)
+                    .withBody("""
+                          {
+                                |  "type": "CorporateBody",
+                                |  "ids": [
+                                |    {
+                                |      "type": "ARN",
+                                |      "value": "WARN1442450"
+                                |    },
+                                |    {
+                                |      "type": "SAFE",
+                                |      "value": "XE0000586571722"
+                                |    },
+                                |    {
+                                |      "type": "SAP",
+                                |      "value": "8231791429"
+                                |    }
+                                |  ],
+                                |  "address": {
+                                |    "lineOne": "2627 Gus Hill",
+                                |    "lineTwo": "Apt. 898",
+                                |    "lineThree": "",
+                                |    "lineFour": "West Corrinamouth",
+                                |    "postalCode": "OX2 3HD",
+                                |    "countryCode": "AD"
+                                |  },
+                                |  "contactDetails": {
+                                |    "landline": "176905117",
+                                |    "mobile": "62281724761",
+                                |    "fax": "08959633679",
+                                |    "emailAddress": "edward.goodenough@example.com"
+                                |  }
+                                |}
+                                |""".stripMargin)
+                )
+            )
+
+            val request = Request(
+              id = Requests.Id(
+                idType = Requests.IdType.UTR,
+                value = "1234567890"
+              ),
+              name = "Dyson",
+              _type = Requests.Type.CorporateBody
+            )
+
+            assertThrows[ResponseParsingException] {
+              await(service.call(request))
+            }
             verifyThatDownstreamApiWasCalled()
           }
         }

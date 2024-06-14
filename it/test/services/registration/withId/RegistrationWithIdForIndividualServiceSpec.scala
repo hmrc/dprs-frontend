@@ -17,6 +17,7 @@
 package services.registration.withId
 
 import com.github.tomakehurst.wiremock.client.WireMock._
+import connectors.BaseConnector.Exceptions.ResponseParsingException
 import connectors.registration.withId.RegistrationWithIdForIndividualConnector
 import play.api.http.Status.{BAD_REQUEST, CONFLICT, FORBIDDEN, INTERNAL_SERVER_ERROR, NOT_FOUND, OK, SERVICE_UNAVAILABLE, UNAUTHORIZED}
 import services.BaseBackendConnectorSpec
@@ -546,7 +547,114 @@ class RegistrationWithIdForIndividualServiceSpec extends BaseBackendConnectorSpe
           }
         }
       }
+      "invalid, with a status code of" - {
+        "service unavailable" in {
+          stubFor(
+            post(urlEqualTo(connectorPath))
+              .withRequestBody(equalToJson("""
+                                             |{
+                                             |  "id": {
+                                             |    "type": "NINO",
+                                             |    "value": "AA000000A"
+                                             |  },
+                                             |  "firstName": "Patrick",
+                                             |  "middleName": "John",
+                                             |  "lastName": "Dyson",
+                                             |  "dateOfBirth": "1970-10-04"
+                                             |}
+                                             |""".stripMargin))
+              .willReturn(
+                aResponse()
+                  .withHeader("Content-Type", "application/json")
+                  .withStatus(SERVICE_UNAVAILABLE)
+                  .withBody("""
+                              |[
+                              |  {
+                              |    "codex": "eis-returned-service-unavailable"
+                              |  }
+                              |]
+                              |""".stripMargin)
+              )
+          )
+
+          val request = Request(
+            id = Requests.Id(
+              idType = Requests.IdType.NINO,
+              value = "AA000000A"
+            ),
+            firstName = "Patrick",
+            middleName = Some("John"),
+            lastName = "Dyson",
+            dateOfBirth = "1970-10-04"
+          )
+
+          assertThrows[ResponseParsingException] {
+            await(service.call(request))
+          }
+          verifyThatDownstreamApiWasCalled()
+        }
+        "OK" in {
+          stubFor(
+            post(urlEqualTo(connectorPath))
+              .withRequestBody(equalToJson("""
+                                             |{
+                                             |  "id": {
+                                             |    "type": "NINO",
+                                             |    "value": "AA000000A"
+                                             |  },
+                                             |  "firstName": "Patrick",
+                                             |  "middleName": "John",
+                                             |  "lastName": "Dyson",
+                                             |  "dateOfBirth": "1970-10-04"
+                                             |}
+                                             |""".stripMargin))
+              .willReturn(
+                aResponse()
+                  .withHeader("Content-Type", "application/json")
+                  .withStatus(OK)
+                  .withBody("""
+                              |{
+                              |  "ids": [
+                              |    {
+                              |      "type": "ARN",
+                              |      "value": "WARN3849921"
+                              |    },
+                              |    {
+                              |      "type": "SAFE",
+                              |      "value": "XE0000200775706"
+                              |    },
+                              |    {
+                              |      "type": "SAP",
+                              |      "value": "1960629967"
+                              |    }
+                              |  ],
+                              |  "firstName": "Patrick",
+                              |  "middleName": "John",
+                              |  "lastName": "Dyson",
+                              |  "dateOfBirth": "1970-10-04"
+                              |}
+                              |""".stripMargin)
+              )
+          )
+
+          val request = Request(
+            id = Requests.Id(
+              idType = Requests.IdType.NINO,
+              value = "AA000000A"
+            ),
+            firstName = "Patrick",
+            middleName = Some("John"),
+            lastName = "Dyson",
+            dateOfBirth = "1970-10-04"
+          )
+
+          assertThrows[ResponseParsingException] {
+            await(service.call(request))
+          }
+
+          verifyThatDownstreamApiWasCalled()
+        }
+      }
     }
   }
-
 }
