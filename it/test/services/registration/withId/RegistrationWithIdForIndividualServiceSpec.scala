@@ -548,7 +548,7 @@ class RegistrationWithIdForIndividualServiceSpec extends BaseBackendConnectorSpe
         }
       }
       "invalid, with a status code of" - {
-        "service unavailable" in {
+        "internal error" in {
           stubFor(
             post(urlEqualTo(connectorPath))
               .withRequestBody(equalToJson("""
@@ -570,7 +570,7 @@ class RegistrationWithIdForIndividualServiceSpec extends BaseBackendConnectorSpe
                   .withBody("""
                               |[
                               |  {
-                              |    "codex": "eis-returned-service-unavailable"
+                              |    "codex": "eis-returned-internal-error"
                               |  }
                               |]
                               |""".stripMargin)
